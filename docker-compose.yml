@@ -13,9 +13,13 @@ services:
       - ./apps/api:/app
       - /app/node_modules
 
+    env_file:
+      - .env
+
     environment:
       NODE_ENV: development
       PORT: 3333
+      DATABASE_URL: ${DATABASE_URL}
 
     depends_on:
       - postgres
@@ -34,6 +38,9 @@ services:
       - ./apps/web:/app
       - /app/node_modules
 
+    env_file:
+      - .env
+
     environment:
       VITE_API_URL: http://localhost:3333
 
@@ -46,12 +53,12 @@ services:
     container_name: stock-postgres
 
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT:-5433}:5432'
 
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: stock
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-stock}
 
     volumes:
       - postgres_data:/var/lib/postgresql/data

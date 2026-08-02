@@ -4,12 +4,12 @@ Aplicação full stack moderna construída com **React, Node.js, Express, TypeSc
 
 ## Tecnologias
 
-| Camada     | Tecnologias                                   |
-| ---------- | --------------------------------------------- |
-| Frontend   | React 19, TypeScript, Vite                    |
-| Backend    | Node.js, Express, TypeScript                  |
-| Banco      | PostgreSQL 17+                                |
-| Infra      | Docker + Docker Compose                       |
+| Camada   | Tecnologias                  |
+| -------- | ---------------------------- |
+| Frontend | React 19, TypeScript, Vite   |
+| Backend  | Node.js, Express, TypeScript |
+| Banco    | PostgreSQL 17+               |
+| Infra    | Docker + Docker Compose      |
 
 ## Estrutura
 
@@ -45,18 +45,18 @@ cp .env.example .env
 ## Executar com Docker
 
 ```bash
-docker compose up --build
+npm run dev:detached
 ```
 
-| Serviço     | URL                          |
-| ----------- | ---------------------------- |
-| Web         | http://localhost:5173        |
-| API         | http://localhost:3333        |
-| PostgreSQL  | localhost:5432               |
+| Serviço    | URL                   |
+| ---------- | --------------------- |
+| Web        | http://localhost:5173 |
+| API        | http://localhost:3333 |
+| PostgreSQL | localhost:5433        |
 
 ```bash
 # Parar os containers
-docker compose down
+npm run down
 
 # Parar e remover os volumes
 docker compose down -v
@@ -92,28 +92,28 @@ cd apps/web
 npm run dev
 ```
 
-| Serviço     | URL                   |
-| ----------- | --------------------- |
-| Web         | http://localhost:5173 |
-| API         | http://localhost:3333 |
+| Serviço | URL                   |
+| ------- | --------------------- |
+| Web     | http://localhost:5173 |
+| API     | http://localhost:3333 |
 
 ## Scripts
 
 ### API
 
-| Script        | Descrição                    |
-| ------------- | ---------------------------- |
-| `npm run dev` | Inicia em modo desenvolvimento (hot reload) |
-| `npm run build` | Compila para `dist/`         |
-| `npm run start` | Inicia a versão compilada    |
-| `npm run lint` | Executa o lint               |
-| `npm run typecheck` | Verifica os tipos do TypeScript |
+| Script              | Descrição                                   |
+| ------------------- | ------------------------------------------- |
+| `npm run dev`       | Inicia em modo desenvolvimento (hot reload) |
+| `npm run build`     | Compila para `dist/`                        |
+| `npm run start`     | Inicia a versão compilada                   |
+| `npm run lint`      | Executa o lint                              |
+| `npm run typecheck` | Verifica os tipos do TypeScript             |
 
 ### Web
 
-| Script        | Descrição                    |
-| ------------- | ---------------------------- |
-| `npm run dev` | Inicia em modo desenvolvimento |
-| `npm run build` | Gera o build de produção     |
-| `npm run lint` | Executa o lint               |
-| `npm run preview` | Previsualiza o build         |
+| Script            | Descrição                      |
+| ----------------- | ------------------------------ |
+| `npm run dev`     | Inicia em modo desenvolvimento |
+| `npm run build`   | Gera o build de produção       |
+| `npm run lint`    | Executa o lint                 |
+| `npm run preview` | Previsualiza o build           |
