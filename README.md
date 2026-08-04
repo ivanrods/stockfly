@@ -97,6 +97,27 @@ npm run dev
 | Web     | http://localhost:5173 |
 | API     | http://localhost:3333 |
 
+## Testes
+
+### Web
+
+```bash
+cd apps/web
+
+# Rodar em modo watch
+npm run test
+
+# Rodar uma vez
+npm run test:run
+
+# Com cobertura
+npm run test:coverage
+```
+
+### API
+
+Ainda sem testes configurados.
+
 ## Scripts
 
 ### API
@@ -111,9 +132,12 @@ npm run dev
 
 ### Web
 
-| Script            | Descrição                      |
-| ----------------- | ------------------------------ |
-| `npm run dev`     | Inicia em modo desenvolvimento |
-| `npm run build`   | Gera o build de produção       |
-| `npm run lint`    | Executa o lint                 |
-| `npm run preview` | Previsualiza o build           |
+| Script              | Descrição                                   |
+| ------------------- | ------------------------------------------- |
+| `npm run dev`       | Inicia em modo desenvolvimento              |
+| `npm run build`     | Gera o build de produção                    |
+| `npm run test`      | Roda os testes em modo watch               |
+| `npm run test:run`  | Roda os testes uma vez                     |
+| `npm run test:coverage` | Roda os testes com cobertura           |
+| `npm run lint`      | Executa o lint                              |
+| `npm run preview`   | Previsualiza o build                        |
