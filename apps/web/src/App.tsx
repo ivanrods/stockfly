@@ -1,11 +1,10 @@
-import './App.css';
+import Button from '@mui/material/Button';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-function App() {
+export default function App() {
   return (
-    <>
-      <div>web</div>
-    </>
+    <Button variant="contained" startIcon={<DeleteIcon />}>
+      Apagar
+    </Button>
   );
 }
-
-export default App;
