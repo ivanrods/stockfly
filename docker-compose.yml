@@ -11,7 +11,6 @@ services:
 
     volumes:
       - ./apps/api:/app
-      - /app/node_modules
 
     env_file:
       - .env
@@ -36,7 +35,6 @@ services:
 
     volumes:
       - ./apps/web:/app
-      - /app/node_modules
 
     env_file:
       - .env
