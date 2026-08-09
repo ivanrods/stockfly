@@ -1,7 +1,10 @@
 import express from 'express';
-import { sequelize } from './shared/config/database.js';
+import cors from 'cors';
+import authRoutes from './modules/auth/routes/auth-routes';
+
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 
 app.get('/health', (_req, res) => {
@@ -9,17 +12,12 @@ app.get('/health', (_req, res) => {
     status: 'ok',
   });
 });
-async function initializeDatabase() {
-  try {
-    await sequelize.authenticate();
-    console.log('Database connected');
-    await sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
-  } catch (error) {
-    console.error('Database connection error:', error);
-  }
-}
 
-initializeDatabase();
+app.use('/auth', authRoutes);
+
+app.use((err: any, _req: express.Request, res: express.Response, _next: () => void) => {
+  console.error('Unhandled error:', err.message || err);
+  res.status(500).json({ message: 'Erro interno do servidor' });
+});
+
 export { app };
-
-// ... existing code ...
