@@ -1,11 +1,11 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { User } from '../../../shared/database/models/user-model';
 import jwtConfig from '../../../shared/config/jwt';
+import authRepository from '../repository/auth-repository';
 
 class AuthService {
   async login(email: string, password: string) {
-    const user = await User.findOne({ where: { email } });
+    const user = await authRepository.findByEmail(email);
 
     if (!user) throw new Error('Usuário não encontrado');
 
@@ -25,13 +25,13 @@ class AuthService {
   }
 
   async register({ email, password, name }: { email: string; password: string; name: string }) {
-    const existingUser = await User.findOne({ where: { email } });
+    const existingUser = await authRepository.findByEmail(email);
 
     if (existingUser) throw new Error('E-mail já está em uso');
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
+    const user = await authRepository.create({
       email,
       password: passwordHash,
       name,

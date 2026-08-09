@@ -1,7 +1,6 @@
 import authService from '../services/auth-service';
 import { RegisterDTO } from '../dto/register-dto';
 import { Request, Response } from 'express';
-import jwtConfig from '../../../shared/config/jwt';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordMinLength = 8;
