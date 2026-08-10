@@ -1,21 +1,18 @@
 import authService from '../services/auth-service';
+import { LoginDTO } from '../dto/login-dto';
 import { RegisterDTO } from '../dto/register-dto';
+import { loginSchema, registerSchema } from '../validation/auth-validation';
 import { Request, Response } from 'express';
-
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const passwordMinLength = 8;
 
 class AuthController {
   async login(req: Request, res: Response) {
-    const { email, password } = req.body as RegisterDTO;
+    const parsed = loginSchema.safeParse(req.body);
 
-    if (!email || !password) {
-      return res.status(400).json({ message: 'Email e senha são obrigatórios' });
+    if (!parsed.success) {
+      return res.status(400).json({ message: parsed.error.issues[0]!.message });
     }
 
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Formato de e-mail inválido' });
-    }
+    const { email, password } = parsed.data as LoginDTO;
 
     try {
       const result = await authService.login(email, password);
@@ -29,23 +26,13 @@ class AuthController {
   }
 
   async register(req: Request, res: Response) {
-    const { email, password, name } = req.body as RegisterDTO;
+    const parsed = registerSchema.safeParse(req.body);
 
-    if (!email || !password || !name) {
-      return res.status(400).json({ message: 'Email, senha e nome são obrigatórios' });
+    if (!parsed.success) {
+      return res.status(400).json({ message: parsed.error.issues[0]!.message });
     }
 
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Formato de e-mail inválido' });
-    }
-
-    if (password.length < passwordMinLength) {
-      return res.status(400).json({ message: 'A senha deve ter no mínimo 8 caracteres' });
-    }
-
-    if (name.length < 1) {
-      return res.status(400).json({ message: 'O nome é obrigatório' });
-    }
+    const { email, password, name } = parsed.data as RegisterDTO;
 
     try {
       const { user, token } = await authService.register({ email, password, name });
