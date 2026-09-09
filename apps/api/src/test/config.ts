@@ -3,7 +3,7 @@ import 'dotenv/config';
 const testDbName = 'stock_test';
 
 function reachableFromHost(url: URL): void {
-  if (url.hostname === 'postgres') {
+  if (url.hostname === 'postgres' && process.env.DOCKER_ENV !== 'true') {
     url.hostname = 'localhost';
     url.port = process.env.POSTGRES_PORT || '5433';
   }
