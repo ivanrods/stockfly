@@ -1,64 +1,86 @@
 import { useState } from 'react';
+import { Box, TextField, Button, Alert, Typography } from '@mui/material';
+import { useRegister } from '../hooks/use-register';
 
 export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const { register, isLoading, error } = useRegister();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!name || !email || !password) {
-      setError('Por favor, preencha todos os campos.');
       return;
     }
 
-    setError('');
+    try {
+      const result = await register({ name, email, password });
+      setSuccess(result.message);
+    } catch {
+      // error já está no hook
+    }
   };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <h2>Criar Conta</h2>
+    <Box
+      component="form"
+      onSubmit={handleSubmit}
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2,
+        maxWidth: 400,
+        mx: 'auto',
+        mt: 8,
+        p: 3,
+      }}
+    >
+      <Typography variant="h5" component="h1">
+        Criar Conta
+      </Typography>
 
-        {error && <p>{error}</p>}
+      {error && <Alert severity="error">{error}</Alert>}
+      {success && <Alert severity="success">{success}</Alert>}
 
-        <div>
-          <label htmlFor="name">Nome</label>
-          <input
-            type="text"
-            id="name"
-            placeholder="Seu nome completo"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
+      <TextField
+        label="Nome"
+        id="name"
+        placeholder="Seu nome completo"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+        fullWidth
+      />
 
-        <div>
-          <label htmlFor="email">E-mail</label>
-          <input
-            type="email"
-            id="email"
-            placeholder="seu-email@exemplo.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
+      <TextField
+        label="E-mail"
+        id="email"
+        type="email"
+        placeholder="seu-email@exemplo.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+        fullWidth
+      />
 
-        <div>
-          <label htmlFor="password">Senha</label>
-          <input
-            type="password"
-            id="password"
-            placeholder="Digite sua senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+      <TextField
+        label="Senha"
+        id="password"
+        type="password"
+        placeholder="Digite sua senha"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+        fullWidth
+        helperText="Mínimo de 8 caracteres"
+      />
 
-        <button type="submit">Entrar</button>
-      </form>
-    </div>
+      <Button type="submit" variant="contained" fullWidth disabled={isLoading}>
+        {isLoading ? 'Criando conta...' : 'Criar Conta'}
+      </Button>
+    </Box>
   );
 }
