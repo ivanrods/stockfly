@@ -15,11 +15,7 @@ class AuthService {
 
     const { password: _password, ...userPayload } = user.toJSON();
 
-    const token = jwt.sign(
-      { id: user.id },
-      jwtConfig.secret!,
-      { expiresIn: jwtConfig.expiresIn },
-    );
+    const token = jwt.sign({ id: user.id }, jwtConfig.secret!, { expiresIn: jwtConfig.expiresIn });
 
     return { user: userPayload, token };
   }
@@ -39,11 +35,7 @@ class AuthService {
 
     const { password: _password, ...userPayload } = user.toJSON();
 
-    const token = jwt.sign(
-      { id: user.id },
-      jwtConfig.secret!,
-      { expiresIn: jwtConfig.expiresIn },
-    );
+    const token = jwt.sign({ id: user.id }, jwtConfig.secret!, { expiresIn: jwtConfig.expiresIn });
 
     return { user: userPayload, token };
   }

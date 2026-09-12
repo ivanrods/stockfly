@@ -132,12 +132,12 @@ Ainda sem testes configurados.
 
 ### Web
 
-| Script              | Descrição                                   |
-| ------------------- | ------------------------------------------- |
-| `npm run dev`       | Inicia em modo desenvolvimento              |
-| `npm run build`     | Gera o build de produção                    |
-| `npm run test`      | Roda os testes em modo watch               |
-| `npm run test:run`  | Roda os testes uma vez                     |
-| `npm run test:coverage` | Roda os testes com cobertura           |
-| `npm run lint`      | Executa o lint                              |
-| `npm run preview`   | Previsualiza o build                        |
+| Script                  | Descrição                      |
+| ----------------------- | ------------------------------ |
+| `npm run dev`           | Inicia em modo desenvolvimento |
+| `npm run build`         | Gera o build de produção       |
+| `npm run test`          | Roda os testes em modo watch   |
+| `npm run test:run`      | Roda os testes uma vez         |
+| `npm run test:coverage` | Roda os testes com cobertura   |
+| `npm run lint`          | Executa o lint                 |
+| `npm run preview`       | Previsualiza o build           |
