@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   quality:
-    name: Lint & Format
+    name: Format Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +23,6 @@ jobs:
           cache-dependency-path: package-lock.json
 
       - run: npm ci
-      - run: npm run lint
       - run: npm run format:check
 
   web:
@@ -79,6 +78,7 @@ jobs:
           cache-dependency-path: apps/api/package-lock.json
 
       - run: npm ci
+      - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
       - run: npm run test:run
