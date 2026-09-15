@@ -10,8 +10,8 @@ Guia de referência para IA que trabalham neste projeto. Leia antes de fazer qua
 
 | Camada   | Tecnologias                                        |
 | -------- | -------------------------------------------------- |
-| Frontend | React 19, TypeScript 6, Vite 8, MUI 9, Axios      |
-| Backend  | Node.js 22, Express 5, TypeScript 6, Zod 4        |
+| Frontend | React 19, TypeScript 6, Vite 8, MUI 9, Axios       |
+| Backend  | Node.js 22, Express 5, TypeScript 6, Zod 4         |
 | Banco    | PostgreSQL 17, Sequelize 6                         |
 | Auth     | bcrypt, jsonwebtoken (JWT)                         |
 | Infra    | Docker Compose (api:3333, web:5173, postgres:5433) |
@@ -19,6 +19,7 @@ Guia de referência para IA que trabalham neste projeto. Leia antes de fazer qua
 | Lint     | ESLint 10 (flat config), Prettier 3                |
 
 > **Documentação de referência:**
+>
 > - `ROADMAP.md` — features feitas, pendentes e ordem de prioridade. Consulte antes de implementar algo novo.
 > - `DATABASE.md` — schema atual e planejado, regras de banco, convenções.
 > - `API.md` — endpoints atuais e planejados, formatos de request/response.
@@ -75,21 +76,27 @@ stockfly/
 1. Criar pasta `src/modules/products/` com as subpastas: `routes/`, `controllers/`, `services/`, `repository/`, `validation/`, `dto/`
 
 2. **Model** — Criar em `src/shared/database/models/`:
+
    ```typescript
    // product-model.ts
    import { DataTypes } from 'sequelize';
    import sequelize from '../config/database';
 
-   export const Product = sequelize.define('Product', {
-     id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-     name: { type: DataTypes.STRING, allowNull: false },
-     // ... campos
-   }, { timestamps: true });
+   export const Product = sequelize.define(
+     'Product',
+     {
+       id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
+       name: { type: DataTypes.STRING, allowNull: false },
+       // ... campos
+     },
+     { timestamps: true },
+   );
    ```
 
 3. **Migration** — Criar via `npm run db:create-migration -- <nome>` em `apps/api/`
 
 4. **Validation** — Schema Zod em `validation/`:
+
    ```typescript
    import { z } from 'zod';
 
@@ -100,6 +107,7 @@ stockfly/
    ```
 
 5. **DTO** — Tipos inferidos em `dto/`:
+
    ```typescript
    import { z } from 'zod';
    import { createProductSchema } from '../validation/product-validation';
@@ -108,24 +116,34 @@ stockfly/
    ```
 
 6. **Repository** — Acesso ao banco (classe com export default singleton):
+
    ```typescript
    import { Product } from '../../../shared/database/models/product-model';
 
    class ProductRepository {
-     async findAll() { return Product.findAll(); }
-     async findById(id: string) { return Product.findByPk(id); }
-     async create(data: CreateProductDTO) { return Product.create(data); }
+     async findAll() {
+       return Product.findAll();
+     }
+     async findById(id: string) {
+       return Product.findByPk(id);
+     }
+     async create(data: CreateProductDTO) {
+       return Product.create(data);
+     }
    }
 
    export default new ProductRepository();
    ```
 
 7. **Service** — Lógica de negócio (classe com export default singleton):
+
    ```typescript
    import productRepository from '../repository/product-repository';
 
    class ProductService {
-     async list() { return productRepository.findAll(); }
+     async list() {
+       return productRepository.findAll();
+     }
      async getById(id: string) {
        const product = await productRepository.findById(id);
        if (!product) throw new Error('Produto não encontrado');
@@ -137,6 +155,7 @@ stockfly/
    ```
 
 8. **Controller** — Validação + HTTP (classe com export default singleton):
+
    ```typescript
    import { Request, Response } from 'express';
    import { createProductSchema } from '../validation/product-validation';
@@ -171,6 +190,7 @@ stockfly/
    ```
 
 9. **Routes** — Registrar rotas em `routes/`:
+
    ```typescript
    import { Router } from 'express';
    import productController from '../controllers/product-controller';
@@ -210,6 +230,7 @@ stockfly/
 1. Criar pasta `src/features/products/` com: `pages/`, `hooks/`, `services/`, `types/`, `components/`
 
 2. **Types** — Definir em `types/`:
+
    ```typescript
    // product-types.ts
    export interface Product {
@@ -220,6 +241,7 @@ stockfly/
    ```
 
 3. **Service** — Chamada API em `services/`:
+
    ```typescript
    // product-service.ts
    import httpClient from '@/shared/api/http-client';
@@ -232,6 +254,7 @@ stockfly/
    ```
 
 4. **Hook** — Lógica de estado em `hooks/`:
+
    ```typescript
    // use-products.ts
    import { useState, useEffect } from 'react';
@@ -255,6 +278,7 @@ stockfly/
    ```
 
 5. **Page** — Componente de página em `pages/`:
+
    ```typescript
    // products-page.tsx
    import { Box, Typography, CircularProgress, Alert } from '@mui/material';
@@ -313,9 +337,7 @@ import { app } from '../../../app';
 
 describe('POST /products', () => {
   it('should create a product', async () => {
-    const response = await request(app)
-      .post('/products')
-      .send({ name: 'Produto Teste' });
+    const response = await request(app).post('/products').send({ name: 'Produto Teste' });
 
     expect(response.status).toBe(201);
     expect(response.body.name).toBe('Produto Teste');
@@ -350,6 +372,7 @@ describe('ProductsPage', () => {
 ## Comandos Úteis
 
 ### Raiz
+
 ```bash
 npm run dev              # Docker compose up --build
 npm run dev:detached     # Docker compose up -d --build
@@ -359,6 +382,7 @@ npm run format           # Format all with Prettier
 ```
 
 ### API (apps/api)
+
 ```bash
 npm run dev              # tsx watch src/server.ts
 npm run build            # tsc → dist/
@@ -370,6 +394,7 @@ npm run db:create-migration -- <nome>  # Criar migration
 ```
 
 ### Web (apps/web)
+
 ```bash
 npm run dev              # vite
 npm run build            # tsc -b && vite build

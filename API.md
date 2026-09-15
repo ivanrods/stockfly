@@ -6,14 +6,14 @@
 
 ## Visão Geral
 
-| Item | Detalhe |
-| ---- | ------- |
-| Base URL | `http://localhost:3333` (API em Docker) |
-| Formato | JSON |
-| Autenticação | JWT via header `Authorization: Bearer <token>` |
-| Validação | Zod (schemas em `src/modules/<feature>/validation/`) |
-| Resposta de erro | `{ "message": string }` |
-| Erro não tratado | `500 { "message": "Erro interno do servidor" }` |
+| Item             | Detalhe                                              |
+| ---------------- | ---------------------------------------------------- |
+| Base URL         | `http://localhost:3333` (API em Docker)              |
+| Formato          | JSON                                                 |
+| Autenticação     | JWT via header `Authorization: Bearer <token>`       |
+| Validação        | Zod (schemas em `src/modules/<feature>/validation/`) |
+| Resposta de erro | `{ "message": string }`                              |
+| Erro não tratado | `500 { "message": "Erro interno do servidor" }`      |
 
 **Estrutura das rotas:** `src/app.ts` registra os módulos em prefixos (`/auth`, `/products`, etc.). Cada módulo expõe seu `Router` em `src/modules/<feature>/routes/`.
 
@@ -34,6 +34,7 @@ router.get('/', auth, productController.list.bind(productController));
 > Público. Verifica se a API está de pé.
 
 **Resposta 200:**
+
 ```json
 { "status": "ok" }
 ```
@@ -45,6 +46,7 @@ router.get('/', auth, productController.list.bind(productController));
 > Público. Cria um novo usuário e retorna o JWT.
 
 **Body:**
+
 ```json
 {
   "name": "João Silva",
@@ -53,13 +55,14 @@ router.get('/', auth, productController.list.bind(productController));
 }
 ```
 
-| Campo | Regras |
-| ----- | ------ |
-| `name` | obrigatório, min 1 |
-| `email` | obrigatório, formato válido |
+| Campo      | Regras                        |
+| ---------- | ----------------------------- |
+| `name`     | obrigatório, min 1            |
+| `email`    | obrigatório, formato válido   |
 | `password` | obrigatório, min 8 caracteres |
 
 **Resposta 201:**
+
 ```json
 {
   "message": "Usuário criado com sucesso",
@@ -75,10 +78,11 @@ router.get('/', auth, productController.list.bind(productController));
 ```
 
 **Erros:**
-| Status | Quando |
-| ------ | ------ |
-| 400 | Validação Zod falhou ou e-mail já em uso |
-| 500 | Erro interno |
+
+| Status | Quando                                   |
+| ------ | ---------------------------------------- |
+| 400    | Validação Zod falhou ou e-mail já em uso |
+| 500    | Erro interno                             |
 
 ---
 
@@ -87,6 +91,7 @@ router.get('/', auth, productController.list.bind(productController));
 > Público. Autentica o usuário e retorna um novo JWT (expira em 1 dia).
 
 **Body:**
+
 ```json
 {
   "email": "joao@example.com",
@@ -95,6 +100,7 @@ router.get('/', auth, productController.list.bind(productController));
 ```
 
 **Resposta 200:**
+
 ```json
 {
   "user": {
@@ -109,11 +115,12 @@ router.get('/', auth, productController.list.bind(productController));
 ```
 
 **Erros:**
-| Status | Quando |
-| ------ | ------ |
-| 400 | Validação Zod falhou |
-| 401 | Usuário não encontrado ou senha inválida |
-| 500 | Erro interno |
+
+| Status | Quando                                   |
+| ------ | ---------------------------------------- |
+| 400    | Validação Zod falhou                     |
+| 401    | Usuário não encontrado ou senha inválida |
+| 500    | Erro interno                             |
 
 ---
 
@@ -122,12 +129,14 @@ router.get('/', auth, productController.list.bind(productController));
 > Derivado do `ROADMAP.md`. Implementar seguindo o padrão feature-module.
 
 ### Auth
+
 - `POST /auth/refresh` — renovar access token (via refresh token)
 - `POST /auth/logout` — revogar refresh token (protegido)
 - `PUT /users/me/password` — alterar senha (protegido)
 - `PUT /users/me` — atualizar dados do perfil (protegido)
 
 ### Companies (multi-tenant)
+
 - `POST /companies` — criar empresa (admin)
 - `GET /companies` — listar
 - `GET /companies/:id` — detalhe
@@ -135,6 +144,7 @@ router.get('/', auth, productController.list.bind(productController));
 - `DELETE /companies/:id` — inativar (admin)
 
 ### Users & RBAC
+
 - `GET /users` — listar usuários da empresa (protegido)
 - `POST /users` — criar usuário (protegido)
 - `PUT /users/:id` — atualizar (protegido)
@@ -143,6 +153,7 @@ router.get('/', auth, productController.list.bind(productController));
 - `GET /roles` — listar papéis
 
 ### Products
+
 - `GET /products` — listar (paginação, filtros, busca)
 - `POST /products` — criar (protegido)
 - `GET /products/:id` — detalhe (protegido)
@@ -151,20 +162,24 @@ router.get('/', auth, productController.list.bind(productController));
 - `POST /products/:id/image` — upload de imagem (protegido)
 
 ### Categories & Suppliers & Customers
+
 - CRUD em `/categories`, `/suppliers`, `/customers` (padrão acima, protegido)
 
 ### Stock
+
 - `POST /stock/in` — registrar entrada (protegido)
 - `POST /stock/out` — registrar saída (protegido)
 - `GET /stock` — visão geral do estoque (protegido)
 - `GET /products/:id/movements` — histórico de movimentações (protegido)
 
 ### Dashboard & Reports
+
 - `GET /dashboard` — cards e últimos movimentos (protegido)
 - `GET /reports/:type` — relatórios (protegido)
 - `GET /reports/:type/export` — exportar CSV/Excel/PDF (protegido)
 
 ### Misc
+
 - `POST /upload` — upload genérico (protegido)
 - `GET /audit-logs` — logs de auditoria (admin)
 

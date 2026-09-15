@@ -6,16 +6,17 @@
 
 ## Visão Geral
 
-| Item | Detalhe |
-| ---- | ------- |
-| Banco | PostgreSQL 17 |
-| ORM | Sequelize 6 |
-| Dialeto | postgres |
-| Migrations | Sequelize CLI (`src/shared/database/migrations/`) |
-| Models | `src/shared/database/models/` |
+| Item       | Detalhe                                                           |
+| ---------- | ----------------------------------------------------------------- |
+| Banco      | PostgreSQL 17                                                     |
+| ORM        | Sequelize 6                                                       |
+| Dialeto    | postgres                                                          |
+| Migrations | Sequelize CLI (`src/shared/database/migrations/`)                 |
+| Models     | `src/shared/database/models/`                                     |
 | Connection | Singleton em `src/shared/config/database.ts` (usa `DATABASE_URL`) |
 
 **Convenções:**
+
 - PK sempre `UUID` (`DataTypes.UUID`, `defaultValue: DataTypes.UUIDV4`)
 - `timestamps: true` (gera `createdAt`, `updatedAt`)
 - Tabelas com nome exato do model (`freezeTableName: true`)
@@ -33,14 +34,14 @@
 
 Representa usuários do sistema. **Não pertence a nenhuma empresa ainda** (multi-tenant será adicionado depois).
 
-| Coluna | Tipo | Restrições |
-| ------ | ---- | ---------- |
-| `id` | UUID | PK, default UUIDV4 |
-| `name` | STRING | NOT NULL |
-| `email` | STRING | NOT NULL, UNIQUE |
-| `password` | STRING | NOT NULL (hash bcrypt) |
-| `createdAt` | DATE | NOT NULL |
-| `updatedAt` | DATE | NOT NULL |
+| Coluna      | Tipo   | Restrições             |
+| ----------- | ------ | ---------------------- |
+| `id`        | UUID   | PK, default UUIDV4     |
+| `name`      | STRING | NOT NULL               |
+| `email`     | STRING | NOT NULL, UNIQUE       |
+| `password`  | STRING | NOT NULL (hash bcrypt) |
+| `createdAt` | DATE   | NOT NULL               |
+| `updatedAt` | DATE   | NOT NULL               |
 
 **Model:** `src/shared/database/models/user-model.ts`
 **Migration:** `20260806132859-create-user.js`
@@ -75,23 +76,23 @@ Company ──┬── User ──── Role ──── Permission
 
 ### Tabelas alvo (resumo)
 
-| Tabela | Campos principais | Relações |
-| ------ | ----------------- | -------- |
-| `Company` | nome, CNPJ, status, endereço | 1:N com Users, Products, Categories, Suppliers, Customers, Stock |
-| `User` | name, email, password (+ `company_id`) | N:1 Company, N:1 Role |
-| `Role` | nome, permissões | 1:N Users, N:N Permissions |
-| `Permission` | chave (ex: `stock.create`) | N:N Roles |
-| `RefreshToken` | token, user, expiração | N:1 User |
-| `Category` | nome | 1:N Products |
-| `Supplier` | nome, telefone, email, endereço, CNPJ, contato | 1:N Products |
-| `Product` | nome, SKU, código de barras, descrição, preço compra, preço venda, quantidade, estoque mínimo, imagem, peso, dimensões, status | N:1 Category, N:1 Supplier, 1:N StockMovement |
-| `StockMovement` | tipo (entrada/saída), quantidade, motivo, valor unitário, nota, data, responsável | N:1 Product, N:1 User (responsável) |
-| `Customer` | nome, telefone, email, endereço, CPF/CNPJ | 1:N Sale |
-| `Sale` | total, data, cliente | N:1 Customer, 1:N SaleItem |
-| `SaleItem` | produto, quantidade, preço | N:1 Sale, N:1 Product |
-| `Purchase` | fornecedor, valor, número da nota, data | N:1 Supplier, 1:N PurchaseItem |
-| `PurchaseItem` | produto, quantidade, valor unitário | N:1 Purchase, N:1 Product |
-| `AuditLog` | user, action, entity, entity_id, dados | N:1 User |
+| Tabela          | Campos principais                                                                                                              | Relações                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
+| `Company`       | nome, CNPJ, status, endereço                                                                                                   | 1:N com Users, Products, Categories, Suppliers, Customers, Stock |
+| `User`          | name, email, password (+ `company_id`)                                                                                         | N:1 Company, N:1 Role                                            |
+| `Role`          | nome, permissões                                                                                                               | 1:N Users, N:N Permissions                                       |
+| `Permission`    | chave (ex: `stock.create`)                                                                                                     | N:N Roles                                                        |
+| `RefreshToken`  | token, user, expiração                                                                                                         | N:1 User                                                         |
+| `Category`      | nome                                                                                                                           | 1:N Products                                                     |
+| `Supplier`      | nome, telefone, email, endereço, CNPJ, contato                                                                                 | 1:N Products                                                     |
+| `Product`       | nome, SKU, código de barras, descrição, preço compra, preço venda, quantidade, estoque mínimo, imagem, peso, dimensões, status | N:1 Category, N:1 Supplier, 1:N StockMovement                    |
+| `StockMovement` | tipo (entrada/saída), quantidade, motivo, valor unitário, nota, data, responsável                                              | N:1 Product, N:1 User (responsável)                              |
+| `Customer`      | nome, telefone, email, endereço, CPF/CNPJ                                                                                      | 1:N Sale                                                         |
+| `Sale`          | total, data, cliente                                                                                                           | N:1 Customer, 1:N SaleItem                                       |
+| `SaleItem`      | produto, quantidade, preço                                                                                                     | N:1 Sale, N:1 Product                                            |
+| `Purchase`      | fornecedor, valor, número da nota, data                                                                                        | N:1 Supplier, 1:N PurchaseItem                                   |
+| `PurchaseItem`  | produto, quantidade, valor unitário                                                                                            | N:1 Purchase, N:1 Product                                        |
+| `AuditLog`      | user, action, entity, entity_id, dados                                                                                         | N:1 User                                                         |
 
 ---
 
