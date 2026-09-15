@@ -18,6 +18,8 @@ Guia de referência para IA que trabalham neste projeto. Leia antes de fazer qua
 | Testes   | Vitest 4, Testing Library, supertest               |
 | Lint     | ESLint 10 (flat config), Prettier 3                |
 
+> **Roadmap de features:** consulte `ROADMAP.md` para saber o que está feito, o que vem a seguir e a ordem de prioridade. Verifique sempre o roadmap antes de implementar algo novo.
+
 ---
 
 ## Estrutura do Monorepo
@@ -286,7 +288,7 @@ stockfly/
 - UI sempre com componentes MUI (`@mui/material`)
 - Erros tratados com `Alert severity="error"` do MUI
 - Loading com `CircularProgress` do MUI
-- Interface doAxios: `import axios, { AxiosError } from 'axios'`
+- Interface do Axios: `import axios, { AxiosError } from 'axios'`
 
 ---
 
@@ -392,7 +394,7 @@ npm run test:coverage    # Vitest com coverage
 - Não usar `any` (preferir tipos corretos ou `unknown`)
 - não usar `console.log` em produção (usar `console.error` apenas)
 - Não retornar senha nas respostas da API
-- Não硬编码ar secrets (usar variáveis de ambiente)
+- Não hardcodar secrets (usar variáveis de ambiente)
 - Não usar `sequelize.sync()` em produção (apenas dev com `alter: true`)
 - Não pular validação no controller (sempre validar com Zod antes de chamar service)
 - Não importar de caminhos relativos que saiam da feature (`../../`)
