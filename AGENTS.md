@@ -18,7 +18,10 @@ Guia de referência para IA que trabalham neste projeto. Leia antes de fazer qua
 | Testes   | Vitest 4, Testing Library, supertest               |
 | Lint     | ESLint 10 (flat config), Prettier 3                |
 
-> **Roadmap de features:** consulte `ROADMAP.md` para saber o que está feito, o que vem a seguir e a ordem de prioridade. Verifique sempre o roadmap antes de implementar algo novo.
+> **Documentação de referência:**
+> - `ROADMAP.md` — features feitas, pendentes e ordem de prioridade. Consulte antes de implementar algo novo.
+> - `DATABASE.md` — schema atual e planejado, regras de banco, convenções.
+> - `API.md` — endpoints atuais e planejados, formatos de request/response.
 
 ---
 
