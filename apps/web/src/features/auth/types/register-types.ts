@@ -1,3 +1,5 @@
+import type { TokenPair } from './auth-types';
+
 export interface RegisterRequest {
   name: string;
   email: string;
@@ -10,8 +12,7 @@ export interface User {
   email: string;
 }
 
-export interface RegisterResponse {
+export interface RegisterResponse extends TokenPair {
   message: string;
   user: User;
-  token: string;
 }

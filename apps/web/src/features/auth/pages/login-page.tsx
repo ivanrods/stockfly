@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, TextField, Button, Alert, Typography } from '@mui/material';
 import { useLogin } from '../hooks/use-login';
 
@@ -7,6 +8,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [success, setSuccess] = useState('');
   const { login, isLoading, error } = useLogin();
+  const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -18,6 +20,7 @@ export default function Login() {
     try {
       const result = await login({ email, password });
       setSuccess(`Bem-vindo, ${result.user.name}!`);
+      navigate('/');
     } catch {
       // error já está no hook
     }

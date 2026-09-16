@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { login as loginService } from '../services/login-service';
 import type { LoginRequest, LoginResponse } from '../types/login-types';
 import { ApiError } from '@/shared/api/http-client';
+import { setTokens } from '@/shared/auth/token-storage';
 
 interface UseLoginReturn {
   login: (data: LoginRequest) => Promise<LoginResponse>;
@@ -19,6 +20,7 @@ export function useLogin(): UseLoginReturn {
 
     try {
       const result = await loginService(data);
+      setTokens(result);
       return result;
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Erro ao fazer login';

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { register as registerService } from '../services/register-service';
 import type { RegisterRequest, RegisterResponse } from '../types/register-types';
 import { ApiError } from '@/shared/api/http-client';
+import { setTokens } from '@/shared/auth/token-storage';
 
 interface UseRegisterReturn {
   register: (data: RegisterRequest) => Promise<RegisterResponse>;
@@ -19,6 +20,7 @@ export function useRegister(): UseRegisterReturn {
 
     try {
       const result = await registerService(data);
+      setTokens(result);
       return result;
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Erro ao criar conta';

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Box, TextField, Button, Alert, Typography } from '@mui/material';
 import { useRegister } from '../hooks/use-register';
 
@@ -8,6 +9,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [success, setSuccess] = useState('');
   const { register, isLoading, error } = useRegister();
+  const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -19,6 +21,7 @@ export default function Register() {
     try {
       const result = await register({ name, email, password });
       setSuccess(result.message);
+      navigate('/');
     } catch {
       // error já está no hook
     }

@@ -20,7 +20,8 @@ describe('register-service', () => {
     const response: RegisterResponse = {
       message: 'Usuário criado com sucesso',
       user: { id: 'user-1', name: 'João', email: 'joao@email.com' },
-      token: 'token-falso',
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
     };
     postMock.mockResolvedValue({ data: response });
 
