@@ -13,3 +13,7 @@ export const registerSchema = z.object({
     .email('Formato de e-mail inválido'),
   password: z.string().min(8, 'A senha deve ter no mínimo 8 caracteres'),
 });
+
+export const refreshTokenSchema = z.object({
+  refreshToken: z.string().min(1, 'Refresh token é obrigatório'),
+});
