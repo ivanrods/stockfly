@@ -5,6 +5,7 @@ import type { RegisterResponse } from '../types/register-types';
 
 const mockState = vi.hoisted(() => ({
   registerMock: vi.fn(),
+  navigateMock: vi.fn(),
   isLoading: false,
   error: null as string | null,
 }));
@@ -17,12 +18,17 @@ vi.mock('../hooks/use-register', () => ({
   }),
 }));
 
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => mockState.navigateMock,
+}));
+
 import Register from './register-page';
 
 const response: RegisterResponse = {
   message: 'Usuário criado com sucesso',
   user: { id: 'user-1', name: 'João', email: 'joao@email.com' },
-  token: 'token-falso',
+  accessToken: 'access-token',
+  refreshToken: 'refresh-token',
 };
 
 describe('Register', () => {
@@ -58,7 +64,7 @@ describe('Register', () => {
     });
   });
 
-  it('exibe a mensagem de sucesso após o registro', async () => {
+  it('exibe a mensagem de sucesso e redireciona para / após o registro', async () => {
     const user = userEvent.setup();
     mockState.registerMock.mockResolvedValue(response);
     render(<Register />);
@@ -69,6 +75,7 @@ describe('Register', () => {
     await user.click(screen.getByRole('button', { name: /Criar Conta/i }));
 
     expect(await screen.findByText('Usuário criado com sucesso')).toBeInTheDocument();
+    expect(mockState.navigateMock).toHaveBeenCalledWith('/');
   });
 
   it('exibe mensagem de erro vinda do hook', () => {

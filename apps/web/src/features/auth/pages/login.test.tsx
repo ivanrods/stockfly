@@ -5,6 +5,7 @@ import type { LoginResponse } from '../types/login-types';
 
 const mockState = vi.hoisted(() => ({
   loginMock: vi.fn(),
+  navigateMock: vi.fn(),
   isLoading: false,
   error: null as string | null,
 }));
@@ -17,11 +18,16 @@ vi.mock('../hooks/use-login', () => ({
   }),
 }));
 
+vi.mock('react-router-dom', () => ({
+  useNavigate: () => mockState.navigateMock,
+}));
+
 import Login from './login-page';
 
 const response: LoginResponse = {
   user: { id: 'user-1', name: 'João', email: 'joao@email.com' },
-  token: 'token-falso',
+  accessToken: 'access-token',
+  refreshToken: 'refresh-token',
 };
 
 describe('Login', () => {
@@ -54,7 +60,7 @@ describe('Login', () => {
     });
   });
 
-  it('exibe a mensagem de sucesso com o nome do usuário após o login', async () => {
+  it('exibe a mensagem de sucesso e redireciona para / após o login', async () => {
     const user = userEvent.setup();
     mockState.loginMock.mockResolvedValue(response);
     render(<Login />);
@@ -64,6 +70,7 @@ describe('Login', () => {
     await user.click(screen.getByRole('button', { name: /Entrar/i }));
 
     expect(await screen.findByText('Bem-vindo, João!')).toBeInTheDocument();
+    expect(mockState.navigateMock).toHaveBeenCalledWith('/');
   });
 
   it('exibe mensagem de erro vinda do hook', () => {

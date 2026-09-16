@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { ApiError } from '@/shared/api/http-client';
+import { clearTokens, getAccessToken, getRefreshToken } from '@/shared/auth/token-storage';
 
 const { registerServiceMock } = vi.hoisted(() => ({
   registerServiceMock: vi.fn(),
@@ -16,11 +17,15 @@ import type { RegisterResponse } from '../types/register-types';
 const response: RegisterResponse = {
   message: 'Usuário criado com sucesso',
   user: { id: 'user-1', name: 'João', email: 'joao@email.com' },
-  token: 'token-falso',
+  accessToken: 'access-token',
+  refreshToken: 'refresh-token',
 };
 
 describe('useRegister', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    clearTokens();
+  });
 
   it('retorna o resultado e alterna isLoading durante a requisição', async () => {
     registerServiceMock.mockResolvedValue(response);
@@ -61,6 +66,8 @@ describe('useRegister', () => {
     });
 
     expect(received).toEqual(response);
+    expect(getAccessToken()).toBe('access-token');
+    expect(getRefreshToken()).toBe('refresh-token');
   });
 
   it('define error quando o serviço lança ApiError e relança a exceção', async () => {

@@ -19,7 +19,8 @@ describe('login-service', () => {
     const data = { email: 'joao@email.com', password: '12345678' };
     const response: LoginResponse = {
       user: { id: 'user-1', name: 'João', email: 'joao@email.com' },
-      token: 'token-falso',
+      accessToken: 'access-token',
+      refreshToken: 'refresh-token',
     };
     postMock.mockResolvedValue({ data: response });
 

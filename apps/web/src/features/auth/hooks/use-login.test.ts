@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { ApiError } from '@/shared/api/http-client';
+import { clearTokens, getAccessToken, getRefreshToken } from '@/shared/auth/token-storage';
 
 const { loginServiceMock } = vi.hoisted(() => ({
   loginServiceMock: vi.fn(),
@@ -15,11 +16,15 @@ import type { LoginResponse } from '../types/login-types';
 
 const response: LoginResponse = {
   user: { id: 'user-1', name: 'João', email: 'joao@email.com' },
-  token: 'token-falso',
+  accessToken: 'access-token',
+  refreshToken: 'refresh-token',
 };
 
 describe('useLogin', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    clearTokens();
+  });
 
   it('alterna isLoading durante a requisição e retorna o resultado', async () => {
     loginServiceMock.mockResolvedValue(response);
@@ -40,6 +45,8 @@ describe('useLogin', () => {
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
+    expect(getAccessToken()).toBe('access-token');
+    expect(getRefreshToken()).toBe('refresh-token');
   });
 
   it('define error quando o serviço lança ApiError e relança a exceção', async () => {
