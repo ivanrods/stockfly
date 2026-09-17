@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import jwtConfig from '../../../shared/config/jwt.js';
 import authRepository from '../repository/auth-repository.js';
+import { UserRole } from '../../../shared/database/models/user-model.js';
 
 function parseExpiresIn(expiresIn: string): number {
   const unit = expiresIn.slice(-1);
@@ -23,17 +24,19 @@ function parseExpiresIn(expiresIn: string): number {
 }
 
 class AuthService {
-  private async generateTokens(userId: string) {
-    const accessToken = jwt.sign({ id: userId }, jwtConfig.secret!, {
-      expiresIn: jwtConfig.expiresIn,
-    });
+  private async generateTokens(user: { id: string; companyId: string | null; role: UserRole }) {
+    const accessToken = jwt.sign(
+      { id: user.id, companyId: user.companyId, role: user.role },
+      jwtConfig.secret!,
+      { expiresIn: jwtConfig.expiresIn },
+    );
 
     const refreshToken = crypto.randomBytes(40).toString('hex');
     const expiresAt = new Date(Date.now() + parseExpiresIn(jwtConfig.refreshExpiresIn));
 
     await authRepository.createRefreshToken({
       token: refreshToken,
-      userId,
+      userId: user.id,
       expiresAt,
     });
 
@@ -51,7 +54,7 @@ class AuthService {
 
     const { password: _password, ...userPayload } = user.toJSON();
 
-    const tokens = await this.generateTokens(user.id);
+    const tokens = await this.generateTokens(user);
 
     return { user: userPayload, ...tokens };
   }
@@ -71,7 +74,7 @@ class AuthService {
 
     const { password: _password, ...userPayload } = user.toJSON();
 
-    const tokens = await this.generateTokens(user.id);
+    const tokens = await this.generateTokens(user);
 
     return { user: userPayload, ...tokens };
   }
@@ -86,9 +89,12 @@ class AuthService {
       throw new Error('Refresh token expirado');
     }
 
+    const user = await authRepository.findById(stored.userId);
+    if (!user) throw new Error('Usuário não encontrado');
+
     await authRepository.deleteRefreshToken(refreshToken);
 
-    const tokens = await this.generateTokens(stored.userId);
+    const tokens = await this.generateTokens(user);
 
     return tokens;
   }

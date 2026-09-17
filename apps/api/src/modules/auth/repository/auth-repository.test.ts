@@ -1,16 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { userFindOneMock, userCreateMock, refreshCreateMock, refreshFindOneMock, destroyMock } =
-  vi.hoisted(() => ({
-    userFindOneMock: vi.fn(),
-    userCreateMock: vi.fn(),
-    refreshCreateMock: vi.fn(),
-    refreshFindOneMock: vi.fn(),
-    destroyMock: vi.fn(),
-  }));
+const {
+  userFindOneMock,
+  userFindByPkMock,
+  userCreateMock,
+  refreshCreateMock,
+  refreshFindOneMock,
+  destroyMock,
+} = vi.hoisted(() => ({
+  userFindOneMock: vi.fn(),
+  userFindByPkMock: vi.fn(),
+  userCreateMock: vi.fn(),
+  refreshCreateMock: vi.fn(),
+  refreshFindOneMock: vi.fn(),
+  destroyMock: vi.fn(),
+}));
 
 vi.mock('../../../shared/database/models/user-model.js', () => ({
-  User: { findOne: userFindOneMock, create: userCreateMock },
+  User: { findOne: userFindOneMock, findByPk: userFindByPkMock, create: userCreateMock },
 }));
 
 vi.mock('../../../shared/database/models/refresh-token-model.js', () => ({
@@ -28,6 +35,14 @@ describe('AuthRepository', () => {
     await authRepository.findByEmail('a@b.com');
 
     expect(userFindOneMock).toHaveBeenCalledWith({ where: { email: 'a@b.com' } });
+  });
+
+  it('findById chama User.findByPk com o id', async () => {
+    userFindByPkMock.mockResolvedValue({ id: '1' });
+
+    await authRepository.findById('1');
+
+    expect(userFindByPkMock).toHaveBeenCalledWith('1');
   });
 
   it('create chama User.create com os dados', async () => {

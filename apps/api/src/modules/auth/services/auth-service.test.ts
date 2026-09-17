@@ -4,6 +4,7 @@ import type { RefreshToken } from '../../../shared/database/models/refresh-token
 
 const {
   findByEmailMock,
+  findByIdMock,
   createMock,
   hashMock,
   compareMock,
@@ -13,6 +14,7 @@ const {
   deleteRefreshTokenMock,
 } = vi.hoisted(() => ({
   findByEmailMock: vi.fn<(email: string) => Promise<User | null>>(),
+  findByIdMock: vi.fn<(id: string) => Promise<User | null>>(),
   createMock: vi.fn<(data: { email: string; password: string; name: string }) => Promise<User>>(),
   hashMock: vi.fn(async (_password: string, _saltRounds: number) => 'senha-hasheada'),
   compareMock: vi.fn(async (_password: string, _hash: string) => true),
@@ -25,6 +27,7 @@ const {
 vi.mock('../repository/auth-repository.js', () => ({
   default: {
     findByEmail: findByEmailMock,
+    findById: findByIdMock,
     create: createMock,
     createRefreshToken: createRefreshTokenMock,
     findRefreshToken: findRefreshTokenMock,
@@ -42,6 +45,8 @@ function makeUser() {
     email: 'user@email.com',
     name: 'João',
     password: 'senha-hasheada',
+    companyId: null,
+    role: 'viewer',
     toJSON() {
       return { ...this };
     },
@@ -69,7 +74,11 @@ describe('AuthService.register', () => {
       password: 'senha-hasheada',
       name: user.name,
     });
-    expect(signMock).toHaveBeenCalled();
+    expect(signMock).toHaveBeenCalledWith(
+      expect.objectContaining({ id: user.id, companyId: null, role: 'viewer' }),
+      expect.anything(),
+      expect.anything(),
+    );
     expect(createRefreshTokenMock).toHaveBeenCalled();
     expect(result.user.password).toBeUndefined();
     expect(result.accessToken).toBe('token-falso');
@@ -125,9 +134,11 @@ describe('AuthService.refresh', () => {
       expiresAt: new Date(Date.now() + 60 * 60 * 1000),
     } as unknown as RefreshToken;
     findRefreshTokenMock.mockResolvedValue(stored);
+    findByIdMock.mockResolvedValue(user);
 
     const result = await authService.refresh('refresh-token-antigo');
 
+    expect(findByIdMock).toHaveBeenCalledWith(user.id);
     expect(deleteRefreshTokenMock).toHaveBeenCalledWith('refresh-token-antigo');
     expect(createRefreshTokenMock).toHaveBeenCalled();
     expect(result.accessToken).toBe('token-falso');

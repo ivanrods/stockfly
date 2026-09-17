@@ -2,7 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NextFunction, Request, Response } from 'express';
 
 const { verifyMock } = vi.hoisted(() => ({
-  verifyMock: vi.fn(() => ({ id: 'user-id' })),
+  verifyMock: vi.fn<
+    (token: string) => {
+      id: string;
+      companyId?: string | null;
+      role?: 'admin' | 'manager' | 'operator' | 'viewer';
+    }
+  >(() => ({ id: 'user-id' })),
 }));
 
 vi.mock('jsonwebtoken', () => ({ default: { verify: verifyMock } }));
@@ -84,7 +90,7 @@ describe('authMiddleware', () => {
   });
 
   it('chama next() e injeta o usuário quando o token é válido', () => {
-    verifyMock.mockReturnValue({ id: 'user-id' });
+    verifyMock.mockReturnValue({ id: 'user-id', companyId: 'company-id', role: 'admin' });
 
     const res = makeRes();
     const next = makeNext();
@@ -93,8 +99,24 @@ describe('authMiddleware', () => {
     authMiddleware(req, res, next);
 
     expect(verifyMock).toHaveBeenCalledWith('token-valido', process.env.JWT_SECRET);
-    expect(req.user).toEqual({ id: 'user-id' });
+    expect(req.user).toEqual({ id: 'user-id', companyId: 'company-id', role: 'admin' });
+    expect(req.companyId).toBe('company-id');
+    expect(req.role).toBe('admin');
     expect(next).toHaveBeenCalledOnce();
     expect(res.statusCode).toBe(0);
+  });
+
+  it('deixa companyId e role indefinidos quando o token não os contém', () => {
+    verifyMock.mockReturnValue({ id: 'user-id' });
+
+    const res = makeRes();
+    const next = makeNext();
+
+    const req = makeReq({ authorization: 'Bearer token-valido' });
+    authMiddleware(req, res, next);
+
+    expect(req.companyId).toBeUndefined();
+    expect(req.role).toBeUndefined();
+    expect(next).toHaveBeenCalledOnce();
   });
 });

@@ -6,6 +6,10 @@ class AuthRepository {
     return User.findOne({ where: { email } });
   }
 
+  async findById(id: string) {
+    return User.findByPk(id);
+  }
+
   async create(data: { email: string; password: string; name: string }) {
     return User.create(data);
   }
