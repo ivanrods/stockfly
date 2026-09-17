@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { Transaction } from 'sequelize';
 
 const {
   userFindOneMock,
@@ -45,13 +46,23 @@ describe('AuthRepository', () => {
     expect(userFindByPkMock).toHaveBeenCalledWith('1');
   });
 
-  it('create chama User.create com os dados', async () => {
-    const data = { email: 'a@b.com', password: 'hash', name: 'João' };
+  it('create chama User.create com os dados e sem transação', async () => {
+    const data = { email: 'a@b.com', password: 'hash', name: 'João', companyId: 'c-1', role: 'admin' as const };
     userCreateMock.mockResolvedValue({ id: '1' });
 
     await authRepository.create(data);
 
-    expect(userCreateMock).toHaveBeenCalledWith(data);
+    expect(userCreateMock).toHaveBeenCalledWith(data, undefined);
+  });
+
+  it('create repassa a transação para User.create', async () => {
+    const data = { email: 'a@b.com', password: 'hash', name: 'João', companyId: 'c-1', role: 'admin' as const };
+    const transaction = { id: 'tx' } as unknown as Transaction;
+    userCreateMock.mockResolvedValue({ id: '1' });
+
+    await authRepository.create(data, transaction);
+
+    expect(userCreateMock).toHaveBeenCalledWith(data, { transaction });
   });
 
   it('createRefreshToken chama RefreshToken.create com os dados', async () => {

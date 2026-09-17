@@ -24,8 +24,57 @@ describe('registerSchema', () => {
       name: 'João',
       email: 'user@email.com',
       password: '12345678',
+      companyName: 'Empresa LTDA',
     });
     expect(result.success).toBe(true);
+  });
+
+  it('aceita CNPJ mascarado e normaliza para 14 dígitos', () => {
+    const result = registerSchema.safeParse({
+      name: 'João',
+      email: 'user@email.com',
+      password: '12345678',
+      companyName: 'Empresa LTDA',
+      cnpj: '12.345.678/0001-90',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.cnpj).toBe('12345678000190');
+  });
+
+  it('aceita campos opcionais vazios como null', () => {
+    const result = registerSchema.safeParse({
+      name: 'João',
+      email: 'user@email.com',
+      password: '12345678',
+      companyName: 'Empresa LTDA',
+      cnpj: '',
+      companyPhone: '',
+    });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.cnpj).toBeNull();
+      expect(result.data.companyPhone).toBeNull();
+    }
+  });
+
+  it('rejeita CNPJ inválido', () => {
+    const result = registerSchema.safeParse({
+      name: 'João',
+      email: 'user@email.com',
+      password: '12345678',
+      companyName: 'Empresa LTDA',
+      cnpj: '123',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejeita empresa sem nome', () => {
+    const result = registerSchema.safeParse({
+      name: 'João',
+      email: 'user@email.com',
+      password: '12345678',
+    });
+    expect(result.success).toBe(false);
   });
 
   it('rejeita senha com menos de 8 caracteres', () => {
@@ -33,12 +82,17 @@ describe('registerSchema', () => {
       name: 'João',
       email: 'user@email.com',
       password: '123',
+      companyName: 'Empresa LTDA',
     });
     expect(result.success).toBe(false);
   });
 
   it('rejeita nome ausente', () => {
-    const result = registerSchema.safeParse({ email: 'user@email.com', password: '12345678' });
+    const result = registerSchema.safeParse({
+      email: 'user@email.com',
+      password: '12345678',
+      companyName: 'Empresa LTDA',
+    });
     expect(result.success).toBe(false);
   });
 });

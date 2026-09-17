@@ -4,6 +4,9 @@ import crypto from 'crypto';
 import jwtConfig from '../../../shared/config/jwt.js';
 import authRepository from '../repository/auth-repository.js';
 import { UserRole } from '../../../shared/database/models/user-model.js';
+import { Company } from '../../../shared/database/models/company-model.js';
+import { sequelize } from '../../../shared/config/database.js';
+import { RegisterDTO } from '../dto/register-dto.js';
 
 function parseExpiresIn(expiresIn: string): number {
   const unit = expiresIn.slice(-1);
@@ -52,31 +55,55 @@ class AuthService {
 
     if (!match) throw new Error('Senha inválida');
 
+    const company = user.companyId ? await Company.findByPk(user.companyId) : null;
+
     const { password: _password, ...userPayload } = user.toJSON();
 
     const tokens = await this.generateTokens(user);
 
-    return { user: userPayload, ...tokens };
+    return { user: userPayload, company: company ? company.toJSON() : null, ...tokens };
   }
 
-  async register({ email, password, name }: { email: string; password: string; name: string }) {
+  async register({
+    email,
+    password,
+    name,
+    companyName,
+    cnpj,
+    companyPhone,
+    companyEmail,
+  }: RegisterDTO) {
     const existingUser = await authRepository.findByEmail(email);
 
     if (existingUser) throw new Error('E-mail já está em uso');
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const user = await authRepository.create({
-      email,
-      password: passwordHash,
-      name,
+    const { user, company } = await sequelize.transaction(async (transaction) => {
+      const createdCompany = await Company.create(
+        { name: companyName, cnpj, phone: companyPhone, email: companyEmail },
+        { transaction },
+      );
+
+      const createdUser = await authRepository.create(
+        {
+          email,
+          password: passwordHash,
+          name,
+          companyId: createdCompany.id,
+          role: 'admin',
+        },
+        transaction,
+      );
+
+      return { user: createdUser, company: createdCompany };
     });
 
     const { password: _password, ...userPayload } = user.toJSON();
 
     const tokens = await this.generateTokens(user);
 
-    return { user: userPayload, ...tokens };
+    return { user: userPayload, company: company.toJSON(), ...tokens };
   }
 
   async refresh(refreshToken: string) {

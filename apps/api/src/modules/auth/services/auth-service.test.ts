@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { User } from '../../../shared/database/models/user-model.js';
+import type { User, UserRole } from '../../../shared/database/models/user-model.js';
 import type { RefreshToken } from '../../../shared/database/models/refresh-token-model.js';
+import type { Company } from '../../../shared/database/models/company-model.js';
 
 const {
   findByEmailMock,
@@ -12,16 +13,27 @@ const {
   createRefreshTokenMock,
   findRefreshTokenMock,
   deleteRefreshTokenMock,
+  companyCreateMock,
+  companyFindByPkMock,
+  transactionMock,
 } = vi.hoisted(() => ({
   findByEmailMock: vi.fn<(email: string) => Promise<User | null>>(),
   findByIdMock: vi.fn<(id: string) => Promise<User | null>>(),
-  createMock: vi.fn<(data: { email: string; password: string; name: string }) => Promise<User>>(),
+  createMock: vi.fn<
+    (
+      data: { email: string; password: string; name: string; companyId: string; role: UserRole },
+      transaction?: unknown,
+    ) => Promise<User>
+  >(),
   hashMock: vi.fn(async (_password: string, _saltRounds: number) => 'senha-hasheada'),
   compareMock: vi.fn(async (_password: string, _hash: string) => true),
   signMock: vi.fn(() => 'token-falso'),
   createRefreshTokenMock: vi.fn(async () => undefined),
   findRefreshTokenMock: vi.fn<(token: string) => Promise<RefreshToken | null>>(async () => null),
   deleteRefreshTokenMock: vi.fn(async () => 1),
+  companyCreateMock: vi.fn(async (_data: unknown, _opts?: unknown) => makeCompany()),
+  companyFindByPkMock: vi.fn<(id: string) => Promise<Company | null>>(async () => null),
+  transactionMock: vi.fn(async (fn: (tx: unknown) => unknown) => fn({ id: 'tx' })),
 }));
 
 vi.mock('../repository/auth-repository.js', () => ({
@@ -36,6 +48,12 @@ vi.mock('../repository/auth-repository.js', () => ({
 }));
 vi.mock('bcrypt', () => ({ default: { hash: hashMock, compare: compareMock } }));
 vi.mock('jsonwebtoken', () => ({ default: { sign: signMock } }));
+vi.mock('../../../shared/config/database.js', () => ({
+  sequelize: { transaction: transactionMock },
+}));
+vi.mock('../../../shared/database/models/company-model.js', () => ({
+  Company: { create: companyCreateMock, findByPk: companyFindByPkMock },
+}));
 
 import authService from './auth-service.js';
 
@@ -53,34 +71,65 @@ function makeUser() {
   } as unknown as User;
 }
 
+function makeCompany() {
+  return {
+    id: 'company-id',
+    name: 'Empresa LTDA',
+    cnpj: null,
+    phone: null,
+    email: null,
+    status: 'active',
+    toJSON() {
+      return { ...this };
+    },
+  } as unknown as Company;
+}
+
 const user = makeUser();
+const company = makeCompany();
+const userInCompany = { ...user, companyId: company.id, role: 'admin' } as unknown as User;
 
 describe('AuthService.register', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('cria usuário com senha hasheada e retorna user sem senha + tokens', async () => {
+  it('cria empresa e usuário admin em transação e retorna user + company + tokens', async () => {
     findByEmailMock.mockResolvedValue(null);
-    createMock.mockResolvedValue(user);
+    createMock.mockResolvedValue(userInCompany);
 
     const result = await authService.register({
       email: user.email,
       password: '12345678',
       name: user.name,
+      companyName: company.name,
+      cnpj: null,
+      companyPhone: null,
+      companyEmail: null,
     });
 
     expect(hashMock).toHaveBeenCalledWith('12345678', 10);
-    expect(createMock).toHaveBeenCalledWith({
-      email: user.email,
-      password: 'senha-hasheada',
-      name: user.name,
-    });
+    expect(transactionMock).toHaveBeenCalled();
+    expect(companyCreateMock).toHaveBeenCalledWith(
+      { name: company.name, cnpj: null, phone: null, email: null },
+      { transaction: { id: 'tx' } },
+    );
+    expect(createMock).toHaveBeenCalledWith(
+      {
+        email: user.email,
+        password: 'senha-hasheada',
+        name: user.name,
+        companyId: company.id,
+        role: 'admin',
+      },
+      { id: 'tx' },
+    );
     expect(signMock).toHaveBeenCalledWith(
-      expect.objectContaining({ id: user.id, companyId: null, role: 'viewer' }),
+      expect.objectContaining({ id: user.id, companyId: company.id, role: 'admin' }),
       expect.anything(),
       expect.anything(),
     );
     expect(createRefreshTokenMock).toHaveBeenCalled();
     expect(result.user.password).toBeUndefined();
+    expect(result.company.name).toBe(company.name);
     expect(result.accessToken).toBe('token-falso');
     expect(result.refreshToken).toBeTruthy();
   });
@@ -88,7 +137,19 @@ describe('AuthService.register', () => {
   it('lança erro se o email já está em uso', async () => {
     findByEmailMock.mockResolvedValue(user);
 
-    await expect(authService.register(user)).rejects.toThrow('E-mail já está em uso');
+    await expect(
+      authService.register({
+        email: user.email,
+        password: '12345678',
+        name: user.name,
+        companyName: company.name,
+        cnpj: null,
+        companyPhone: null,
+        companyEmail: null,
+      }),
+    ).rejects.toThrow('E-mail já está em uso');
+
+    expect(transactionMock).not.toHaveBeenCalled();
   });
 });
 
@@ -103,8 +164,21 @@ describe('AuthService.login', () => {
 
     expect(compareMock).toHaveBeenCalledWith('12345678', user.password);
     expect(result.user.password).toBeUndefined();
+    expect(result.company).toBeNull();
+    expect(companyFindByPkMock).not.toHaveBeenCalled();
     expect(result.accessToken).toBe('token-falso');
     expect(result.refreshToken).toBeTruthy();
+  });
+
+  it('loga e retorna a empresa quando o usuário pertence a uma', async () => {
+    findByEmailMock.mockResolvedValue(userInCompany);
+    compareMock.mockResolvedValue(true);
+    companyFindByPkMock.mockResolvedValue(company);
+
+    const result = await authService.login(user.email, '12345678');
+
+    expect(companyFindByPkMock).toHaveBeenCalledWith(company.id);
+    expect(result.company).toMatchObject({ id: company.id, name: company.name });
   });
 
   it('lança erro se o usuário não existe', async () => {

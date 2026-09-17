@@ -1,5 +1,7 @@
 import { User } from '../../../shared/database/models/user-model.js';
 import { RefreshToken } from '../../../shared/database/models/refresh-token-model.js';
+import { UserRole } from '../../../shared/database/models/user-model.js';
+import type { Transaction } from 'sequelize';
 
 class AuthRepository {
   async findByEmail(email: string) {
@@ -10,8 +12,17 @@ class AuthRepository {
     return User.findByPk(id);
   }
 
-  async create(data: { email: string; password: string; name: string }) {
-    return User.create(data);
+  async create(
+    data: {
+      email: string;
+      password: string;
+      name: string;
+      companyId: string;
+      role: UserRole;
+    },
+    transaction?: Transaction,
+  ) {
+    return User.create(data, transaction ? { transaction } : undefined);
   }
 
   async createRefreshToken(data: { token: string; userId: string; expiresAt: Date }) {

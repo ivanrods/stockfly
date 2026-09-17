@@ -5,29 +5,43 @@ import '../../../test/db.js';
 import { app } from '../../../app.js';
 import { User } from '../../../shared/database/models/user-model.js';
 import { RefreshToken } from '../../../shared/database/models/refresh-token-model.js';
+import { Company } from '../../../shared/database/models/company-model.js';
 
 describe('POST /auth/register', () => {
-  const payload = { name: 'João', email: 'joao@email.com', password: '12345678' };
+  const payload = { name: 'João', email: 'joao@email.com', password: '12345678', companyName: 'Empresa LTDA' };
 
-  it('cria usuário e retorna user + accessToken + refreshToken', async () => {
+  it('cria usuário e retorna user + company + accessToken + refreshToken', async () => {
     const res = await request(app).post('/auth/register').send(payload);
 
     expect(res.status).toBe(201);
     expect(res.body.message).toBe('Usuário criado com sucesso');
     expect(res.body.user.email).toBe(payload.email);
     expect(res.body.user.password).toBeUndefined();
+    expect(res.body.user.role).toBe('admin');
+    expect(res.body.company.name).toBe(payload.companyName);
 
-    const decoded = jwt.verify(res.body.accessToken, process.env.JWT_SECRET!);
-    expect(decoded).toMatchObject({ id: res.body.user.id });
+    const decoded = jwt.verify(res.body.accessToken, process.env.JWT_SECRET!) as {
+      id: string;
+      companyId: string;
+      role: string;
+    };
+    expect(decoded).toMatchObject({ id: res.body.user.id, role: 'admin' });
+    expect(decoded.companyId).toBe(res.body.company.id);
+
+    const storedCompany = await Company.findByPk(res.body.company.id);
+    expect(storedCompany).not.toBeNull();
+    expect(storedCompany!.name).toBe(payload.companyName);
+
+    const storedUser = await User.findByPk(res.body.user.id);
+    expect(storedUser!.companyId).toBe(res.body.company.id);
+    expect(storedUser!.role).toBe('admin');
+    expect(storedUser!.password).not.toBe(payload.password);
 
     const storedToken = await RefreshToken.findOne({
       where: { token: res.body.refreshToken },
     });
     expect(storedToken).not.toBeNull();
     expect(storedToken!.userId).toBe(res.body.user.id);
-
-    const stored = await User.findByPk(res.body.user.id);
-    expect(stored!.password).not.toBe(payload.password);
   });
 
   it('retorna 400 se o email já está em uso', async () => {
@@ -49,13 +63,13 @@ describe('POST /auth/register', () => {
 });
 
 describe('POST /auth/login', () => {
-  const payload = { name: 'João', email: 'joao@email.com', password: '12345678' };
+  const payload = { name: 'João', email: 'joao@email.com', password: '12345678', companyName: 'Empresa LTDA' };
 
   async function createUser() {
     await request(app).post('/auth/register').send(payload);
   }
 
-  it('loga e retorna user + accessToken + refreshToken', async () => {
+  it('loga e retorna user + company + accessToken + refreshToken', async () => {
     await createUser();
 
     const res = await request(app)
@@ -65,9 +79,15 @@ describe('POST /auth/login', () => {
     expect(res.status).toBe(200);
     expect(res.body.user.email).toBe(payload.email);
     expect(res.body.user.password).toBeUndefined();
+    expect(res.body.company.name).toBe(payload.companyName);
 
-    const decoded = jwt.verify(res.body.accessToken, process.env.JWT_SECRET!);
-    expect(decoded).toMatchObject({ id: res.body.user.id });
+    const decoded = jwt.verify(res.body.accessToken, process.env.JWT_SECRET!) as {
+      id: string;
+      companyId: string;
+      role: string;
+    };
+    expect(decoded).toMatchObject({ id: res.body.user.id, role: 'admin' });
+    expect(decoded.companyId).toBe(res.body.company.id);
     expect(res.body.refreshToken).toBeTruthy();
   });
 
@@ -99,7 +119,7 @@ describe('POST /auth/login', () => {
 });
 
 describe('POST /auth/refresh', () => {
-  const payload = { name: 'João', email: 'joao@email.com', password: '12345678' };
+  const payload = { name: 'João', email: 'joao@email.com', password: '12345678', companyName: 'Empresa LTDA' };
 
   async function createUserWithRefreshToken() {
     const res = await request(app).post('/auth/register').send(payload);
@@ -172,7 +192,7 @@ describe('POST /auth/refresh', () => {
 });
 
 describe('POST /auth/logout', () => {
-  const payload = { name: 'João', email: 'joao@email.com', password: '12345678' };
+  const payload = { name: 'João', email: 'joao@email.com', password: '12345678', companyName: 'Empresa LTDA' };
 
   it('revoga o refresh token', async () => {
     const res = await request(app).post('/auth/register').send(payload);

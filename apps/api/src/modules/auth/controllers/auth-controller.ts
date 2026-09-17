@@ -34,10 +34,10 @@ class AuthController {
       return res.status(400).json({ message: parsed.error.issues[0]!.message });
     }
 
-    const { email, password, name } = parsed.data as RegisterDTO;
+    const data = parsed.data as RegisterDTO;
 
     try {
-      const result = await authService.register({ email, password, name });
+      const result = await authService.register(data);
       return res.status(201).json({ message: 'Usuário criado com sucesso', ...result });
     } catch (error) {
       if (error instanceof Error) {

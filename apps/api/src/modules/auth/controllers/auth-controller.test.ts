@@ -100,7 +100,7 @@ describe('AuthController.register', () => {
     const res = makeRes();
 
     await authController.register(
-      makeReq({ name: 'João', email: 'a@b.com', password: '12345678' }),
+      makeReq({ name: 'João', email: 'a@b.com', password: '12345678', companyName: 'Empresa' }),
       res,
     );
 
@@ -114,7 +114,7 @@ describe('AuthController.register', () => {
     const res = makeRes();
 
     await authController.register(
-      makeReq({ name: 'João', email: 'a@b.com', password: '12345678' }),
+      makeReq({ name: 'João', email: 'a@b.com', password: '12345678', companyName: 'Empresa' }),
       res,
     );
 
@@ -127,7 +127,7 @@ describe('AuthController.register', () => {
     const res = makeRes();
 
     await authController.register(
-      makeReq({ name: 'João', email: 'a@b.com', password: '12345678' }),
+      makeReq({ name: 'João', email: 'a@b.com', password: '12345678', companyName: 'Empresa' }),
       res,
     );
 
