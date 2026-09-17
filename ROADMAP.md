@@ -24,9 +24,9 @@
 
 ### 1. Refresh Token
 
-- [ ] Renovar access token expirado
-- [ ] `RefreshToken` model + tabela
-- [ ] Logout (revogar refresh token)
+- [x] Renovar access token expirado
+- [x] `RefreshToken` model + tabela
+- [x] Logout (revogar refresh token)
 
 ### 2. Multi-tenant: Empresas (Companies)
 
