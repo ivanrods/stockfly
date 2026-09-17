@@ -1,6 +1,11 @@
 import axios from 'axios';
 import type { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/shared/auth/token-storage';
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+} from '@/shared/auth/token-storage';
 import { redirectToLogin } from '@/shared/auth/redirect';
 import type { TokenPair } from '@/features/auth/types/auth-types';
 

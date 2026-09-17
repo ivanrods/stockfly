@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { clearTokens, getAccessToken, getRefreshToken, setTokens } from '@/shared/auth/token-storage';
+import {
+  clearTokens,
+  getAccessToken,
+  getRefreshToken,
+  setTokens,
+} from '@/shared/auth/token-storage';
 
 const { logoutServiceMock, navigateMock } = vi.hoisted(() => ({
   logoutServiceMock: vi.fn(),

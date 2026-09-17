@@ -144,9 +144,10 @@ describe('POST /auth/refresh', () => {
   });
 
   it('retorna 401 e revoga se o refresh token está expirado', async () => {
-    const { user: registeredUser } = await request(app).post('/auth/register').send(payload).then(
-      (r) => r.body,
-    );
+    const { user: registeredUser } = await request(app)
+      .post('/auth/register')
+      .send(payload)
+      .then((r) => r.body);
 
     const expiredToken = await RefreshToken.create({
       token: 'refresh-token-expirado',
@@ -154,9 +155,7 @@ describe('POST /auth/refresh', () => {
       expiresAt: new Date(Date.now() - 1000),
     });
 
-    const res = await request(app)
-      .post('/auth/refresh')
-      .send({ refreshToken: expiredToken.token });
+    const res = await request(app).post('/auth/refresh').send({ refreshToken: expiredToken.token });
 
     expect(res.status).toBe(401);
     expect(res.body.message).toBe('Refresh token expirado');
