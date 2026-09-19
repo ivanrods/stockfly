@@ -15,6 +15,8 @@
 - [x] Model `User` + migration
 - [x] Testes (Vitest + supertest backend, Testing Library frontend)
 - [x] CI/CD básico (GitHub Actions: lint, typecheck, build, test)
+- [x] Refresh token (renovar access token + logout)
+- [x] Multi-tenant: `Company` + `User.company_id` + `User.role` + JWT `{ id, companyId, role }`
 
 **Detalhe do que já existe:** ver `AGENTS.md`.
 
@@ -32,25 +34,22 @@
 
 Empresa é o container principal. Usuário pertence a uma empresa. Nenhuma empresa vê dados da outra.
 
-- [ ] `Company` model (nome, CNPJ, status, endereço)
-- [ ] `User.company_id` FK com `Company`
-- [ ] Middleware que injeta `company_id` no `req` a partir do usuário autenticado
+- [x] `Company` model (nome, CNPJ, status, endereço)
+- [x] `User.company_id` FK com `Company` (+ `User.role` para RBAC básico)
+- [x] Middleware que injeta `company_id` no `req` a partir do token JWT (`authMiddleware`)
+- [x] JWT carrega `{ id, companyId, role }` (login, register e refresh)
+- [x] `register` cria empresa + usuário `admin` em transação
+- [x] CRUD Empresas escopado por tenant (apenas admin): `GET /companies/me`, `PUT /companies/:id`, `DELETE /companies/:id`
 - [ ] Todos os módulos abaixo escopados por `company_id`
-- [ ] CRUD Empresas (apenas admin)
 
 ### 3. RBAC — Papéis e Permissões
 
-| Papel         | Permissões                  |
-| ------------- | --------------------------- |
-| Administrator | Tudo                        |
-| Gerente       | Movimentar estoque          |
-| Estoquista    | Registrar entradas e saídas |
-| Funcionário   | Apenas consultar            |
+O `User.role` (`admin`/`manager`/`operator`/`viewer`) já existe no schema e no JWT. Falta o RBAC completo:
 
-- [ ] `Role` model + `Permission` model
-- [ ] Relação User ↔ Role
+- [ ] `Role` model + `Permission` model (ou evoluir `role` atual)
 - [ ] Middleware `requireRole()` / `requirePermission()`
 - [ ] Seeds com papéis padrão
+- [ ] Gestão de usuários da empresa (`GET/POST /users`, atribuir papéis)
 
 ### 4. Produtos
 
@@ -189,7 +188,7 @@ Empresa é o container principal. Usuário pertence a uma empresa. Nenhuma empre
 | ORM           | Sequelize          | ✅ Em uso   |
 | Validação     | Zod                | ✅ Em uso   |
 | Autenticação  | JWT + bcrypt       | ✅ Em uso   |
-| Refresh Token | jsonwebtoken       | ⏳ Pendente |
+| Refresh Token | jsonwebtoken       | ✅ Em uso   |
 | Filas         | BullMQ             | ⏳ Pendente |
 | Cache         | Redis              | ⏳ Pendente |
 | Upload        | Multer             | ⏳ Pendente |

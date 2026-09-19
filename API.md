@@ -15,15 +15,17 @@
 | Resposta de erro | `{ "message": string }`                              |
 | Erro não tratado | `500 { "message": "Erro interno do servidor" }`      |
 
-**Estrutura das rotas:** `src/app.ts` registra os módulos em prefixos (`/auth`, `/products`, etc.). Cada módulo expõe seu `Router` em `src/modules/<feature>/routes/`.
+**Estrutura das rotas:** `src/app.ts` registra os módulos em prefixos (`/auth`, `/companies`, etc.). Cada módulo expõe seu `Router` em `src/modules/<feature>/routes/`.
 
-**Regra:** rotas que exigem login devem passar pelo middleware `auth` (`src/middlewares/auth-middleware.ts`).
+**Regra:** rotas protegidas passam pelo middleware `authMiddleware` de `src/shared/middlewares/auth-middleware.ts`. Ele valida o JWT e injeta no `req`: `user`, `companyId` e `role` (`admin`/`manager`/`operator`/`viewer`) extraídos do token.
 
 ```typescript
-import { auth } from '../middlewares/auth-middleware';
+import { authMiddleware } from '../shared/middlewares/auth-middleware';
 
-router.get('/', auth, productController.list.bind(productController));
+router.get('/me', authMiddleware, companyController.getMine.bind(companyController));
 ```
+
+**Multi-tenant:** o JWT carrega `id`, `companyId` e `role`. Módulos de negócio devem escopar consultas e autorizações pelo `req.companyId`.
 
 ---
 
@@ -43,7 +45,7 @@ router.get('/', auth, productController.list.bind(productController));
 
 ### `POST /auth/register`
 
-> Público. Cria um novo usuário e retorna o JWT.
+> Público. Cria uma nova empresa (Company) junto com o usuário administrador (role `admin`) numa transação e retorna os tokens.
 
 **Body:**
 
@@ -51,15 +53,23 @@ router.get('/', auth, productController.list.bind(productController));
 {
   "name": "João Silva",
   "email": "joao@example.com",
-  "password": "minhasenha123"
+  "password": "minhasenha123",
+  "companyName": "Empresa LTDA",
+  "cnpj": "12.345.678/0001-90",
+  "companyPhone": "(11) 99999-0000",
+  "companyEmail": "contato@empresa.com"
 }
 ```
 
-| Campo      | Regras                        |
-| ---------- | ----------------------------- |
-| `name`     | obrigatório, min 1            |
-| `email`    | obrigatório, formato válido   |
-| `password` | obrigatório, min 8 caracteres |
+| Campo           | Regras                                                     |
+| --------------- | ---------------------------------------------------------- |
+| `name`          | obrigatório, min 1                                         |
+| `email`         | obrigatório, formato válido                                |
+| `password`      | obrigatório, min 8 caracteres                              |
+| `companyName`   | obrigatório, min 1 — nome da empresa criada                |
+| `cnpj`          | opcional, vazio → `null`; máscara `XX.XXX.XXX/XXXX-XX` ou 14 dígitos (normalizado) |
+| `companyPhone`  | opcional, vazio → `null`                                   |
+| `companyEmail`  | opcional, formato válido, vazio → `null`                   |
 
 **Resposta 201:**
 
@@ -70,10 +80,21 @@ router.get('/', auth, productController.list.bind(productController));
     "id": "uuid",
     "name": "João Silva",
     "email": "joao@example.com",
+    "companyId": "uuid",
+    "role": "admin",
     "createdAt": "...",
     "updatedAt": "..."
   },
-  "token": "eyJhbGciOi..."
+  "company": {
+    "id": "uuid",
+    "name": "Empresa LTDA",
+    "cnpj": "12345678000190",
+    "status": "active",
+    "createdAt": "...",
+    "updatedAt": "..."
+  },
+  "accessToken": "eyJhbGciOi...",
+  "refreshToken": "hex..."
 }
 ```
 
@@ -82,13 +103,12 @@ router.get('/', auth, productController.list.bind(productController));
 | Status | Quando                                   |
 | ------ | ---------------------------------------- |
 | 400    | Validação Zod falhou ou e-mail já em uso |
-| 500    | Erro interno                             |
 
 ---
 
 ### `POST /auth/login`
 
-> Público. Autentica o usuário e retorna um novo JWT (expira em 1 dia).
+> Público. Autentica o usuário e retorna tokens + empresa vinculada.
 
 **Body:**
 
@@ -107,10 +127,18 @@ router.get('/', auth, productController.list.bind(productController));
     "id": "uuid",
     "name": "João Silva",
     "email": "joao@example.com",
+    "companyId": "uuid",
+    "role": "admin",
     "createdAt": "...",
     "updatedAt": "..."
   },
-  "token": "eyJhbGciOi..."
+  "company": {
+    "id": "uuid",
+    "name": "Empresa LTDA",
+    "status": "active"
+  },
+  "accessToken": "eyJhbGciOi...",
+  "refreshToken": "hex..."
 }
 ```
 
@@ -120,7 +148,133 @@ router.get('/', auth, productController.list.bind(productController));
 | ------ | ---------------------------------------- |
 | 400    | Validação Zod falhou                     |
 | 401    | Usuário não encontrado ou senha inválida |
-| 500    | Erro interno                             |
+
+> O `accessToken` é um JWT com `{ id, companyId, role }`. O `company` pode ser `null` se o usuário não tiver empresa.
+
+---
+
+### `POST /auth/refresh`
+
+> Público. Troca um refresh token válido por um novo par de tokens (o antigo é revogado).
+
+**Body:**
+
+```json
+{ "refreshToken": "hex..." }
+```
+
+**Resposta 200:**
+
+```json
+{ "accessToken": "eyJhbGciOi...", "refreshToken": "hex..." }
+```
+
+**Erros:**
+
+| Status | Quando                                   |
+| ------ | ---------------------------------------- |
+| 400    | Sem `refreshToken` no body               |
+| 401    | Token inválido, expirado ou reutilizado  |
+
+---
+
+### `POST /auth/logout`
+
+> Público. Revoga o refresh token informado.
+
+**Body:**
+
+```json
+{ "refreshToken": "hex..." }
+```
+
+**Resposta 200:**
+
+```json
+{ "message": "Logout realizado com sucesso" }
+```
+
+| Status | Quando                    |
+| ------ | ------------------------- |
+| 400    | Sem `refreshToken` no body |
+
+---
+
+### `GET /companies/me`
+
+> Protegido (`authMiddleware`). Retorna a empresa do usuário autenticado, identificada pelo `companyId` do JWT.
+
+**Resposta 200:**
+
+```json
+{
+  "id": "uuid",
+  "name": "Empresa LTDA",
+  "cnpj": "12345678000190",
+  "status": "active",
+  "phone": null,
+  "email": null,
+  "street": null,
+  "number": null,
+  "complement": null,
+  "neighborhood": null,
+  "city": null,
+  "state": null,
+  "zipCode": null,
+  "createdAt": "...",
+  "updatedAt": "..."
+}
+```
+
+**Erros:**
+
+| Status | Quando                                       |
+| ------ | -------------------------------------------- |
+| 401    | Token ausente ou inválido                    |
+| 404    | Sem `companyId` no token ou empresa não encontrada |
+
+---
+
+### `PUT /companies/:id`
+
+> Protegido (`authMiddleware`). Atualiza a empresa. Exige que `:id` seja o `companyId` do JWT e que o usuário seja `admin`.
+
+**Body (parcial, campos opcionais):**
+
+```json
+{ "phone": "(11) 99999-0000", "city": "São Paulo", "state": "sp" }
+```
+
+Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara normalizado, `state` com 2 letras normalizado para maiúsculas, vazios → `null`).
+
+**Resposta 200:** empresa atualizada (mesmo formato de `GET /companies/me`).
+
+**Erros:**
+
+| Status | Quando                                              |
+| ------ | --------------------------------------------------- |
+| 401    | Token ausente ou inválido                           |
+| 403    | `:id` ≠ `companyId` ou usuário não é `admin`        |
+| 400    | Validação Zod falhou                                |
+| 404    | Empresa não encontrada (`{ "message": "Empresa não encontrada" }` → 400) |
+
+> **Nota:** o controller devolve `400` quando o serviço lança `Error` (incluindo "Empresa não encontrada").
+
+---
+
+### `DELETE /companies/:id`
+
+> Protegido (`authMiddleware`). Inativa a empresa (soft delete, `status: inactive`). Mesmas regras de autorização do `PUT` (só admin, `:id` = companyId).
+
+**Resposta 200:** empresa com `status: "inactive"`.
+
+**Erros:**
+
+| Status | Quando                                              |
+| ------ | --------------------------------------------------- |
+| 401    | Token ausente ou inválido                           |
+| 403    | `:id` ≠ `companyId` ou usuário não é `admin`        |
+| 400    | Empresa não encontrada (serviço lança `Error`)      |
 
 ---
 
@@ -128,20 +282,17 @@ router.get('/', auth, productController.list.bind(productController));
 
 > Derivado do `ROADMAP.md`. Implementar seguindo o padrão feature-module.
 
-### Auth
+### Auth & Users
 
-- `POST /auth/refresh` — renovar access token (via refresh token)
-- `POST /auth/logout` — revogar refresh token (protegido)
 - `PUT /users/me/password` — alterar senha (protegido)
 - `PUT /users/me` — atualizar dados do perfil (protegido)
 
 ### Companies (multi-tenant)
 
-- `POST /companies` — criar empresa (admin)
-- `GET /companies` — listar
-- `GET /companies/:id` — detalhe
-- `PUT /companies/:id` — atualizar (admin)
-- `DELETE /companies/:id` — inativar (admin)
+Já implementado: `GET /companies/me`, `PUT /companies/:id`, `DELETE /companies/:id`.
+
+- `GET /companies` — listar empresas (admin)
+- `GET /companies/:id` — detalhe de outra empresa (admin)
 
 ### Users & RBAC
 
@@ -185,7 +336,7 @@ router.get('/', auth, productController.list.bind(productController));
 
 ---
 
-## Cycle de Vida ao Adicionar Endpoint
+## Ciclo de Vida ao Adicionar Endpoint
 
 1. Criar schema Zod em `src/modules/<feature>/validation/`
 2. Criar DTO em `src/modules/<feature>/dto/`

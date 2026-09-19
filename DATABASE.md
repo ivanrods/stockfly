@@ -30,28 +30,108 @@
 
 > Implementado e migrado.
 
-### `User`
+### `Company`
 
-Representa usuários do sistema. **Não pertence a nenhuma empresa ainda** (multi-tenant será adicionado depois).
+Representa uma empresa (tenant). Todos os dados de negócio pertencem a uma empresa.
 
-| Coluna      | Tipo   | Restrições             |
-| ----------- | ------ | ---------------------- |
-| `id`        | UUID   | PK, default UUIDV4     |
-| `name`      | STRING | NOT NULL               |
-| `email`     | STRING | NOT NULL, UNIQUE       |
-| `password`  | STRING | NOT NULL (hash bcrypt) |
-| `createdAt` | DATE   | NOT NULL               |
-| `updatedAt` | DATE   | NOT NULL               |
+| Coluna         | Tipo    | Restrições             |
+| -------------- | ------- | ---------------------- |
+| `id`           | UUID    | PK, default UUIDV4     |
+| `name`         | STRING  | NOT NULL               |
+| `cnpj`         | STRING  | NULL                   |
+| `phone`        | STRING  | NULL                   |
+| `email`        | STRING  | NULL                   |
+| `status`       | ENUM    | `active`/`inactive`, NOT NULL, default `active` |
+| `street`       | STRING  | NULL                   |
+| `number`       | STRING  | NULL                   |
+| `complement`   | STRING  | NULL                   |
+| `neighborhood` | STRING  | NULL                   |
+| `city`         | STRING  | NULL                   |
+| `state`        | STRING(2) | NULL (UF)            |
+| `zipCode`      | STRING  | NULL (`zip_code`)      |
+| `createdAt`    | DATE    | NOT NULL               |
+| `updatedAt`    | DATE    | NOT NULL               |
 
-**Model:** `src/shared/database/models/user-model.ts`
-**Migration:** `20260806132859-create-user.js`
+**Model:** `src/shared/database/models/company-model.ts`
+**Migration:** `20260917132928-create-company.js`
 
 ```typescript
+class Company extends Model {
+  declare id: string;
+  declare name: string;
+  declare cnpj: string | null;
+  declare phone: string | null;
+  declare email: string | null;
+  declare status: CompanyStatus;
+  declare street: string | null;
+  declare number: string | null;
+  declare complement: string | null;
+  declare neighborhood: string | null;
+  declare city: string | null;
+  declare state: string | null;
+  declare zipCode: string | null;
+}
+```
+
+---
+
+### `User`
+
+Representa usuários do sistema. Cada usuário pertence a uma empresa (`companyId` pode ser `NULL` enquanto o user não tem tenant). O papel (`role`) controla o RBAC básico.
+
+| Coluna      | Tipo   | Restrições                                                       |
+| ----------- | ------ | ---------------------------------------------------------------- |
+| `id`        | UUID   | PK, default UUIDV4                                               |
+| `name`      | STRING | NOT NULL                                                         |
+| `email`     | STRING | NOT NULL, UNIQUE                                                 |
+| `password`  | STRING | NOT NULL (hash bcrypt)                                           |
+| `companyId` | UUID   | NULL, FK → `Company.id`, `onDelete: SET NULL` (`company_id`)     |
+| `role`      | ENUM   | `admin`/`manager`/`operator`/`viewer`, NOT NULL, default `viewer` |
+| `createdAt` | DATE   | NOT NULL                                                         |
+| `updatedAt` | DATE   | NOT NULL                                                         |
+
+**Relações:** `User.belongsTo(Company)` (alias `company`); `Company.hasMany(User)` (alias `users`).
+
+**Model:** `src/shared/database/models/user-model.ts`
+**Migrations:** `20260806132859-create-user.js`, `20260917132931-add-company-to-user.js`
+
+```typescript
+type UserRole = 'admin' | 'manager' | 'operator' | 'viewer';
+
 class User extends Model {
   declare id: string;
   declare name: string;
   declare email: string;
   declare password: string;
+  declare companyId: string | null;
+  declare role: UserRole;
+}
+```
+
+---
+
+### `RefreshToken`
+
+Armazena refresh tokens para renovação do access token.
+
+| Coluna        | Tipo   | Restrições                 |
+| ------------- | ------ | -------------------------- |
+| `id`          | UUID   | PK, default UUIDV4         |
+| `token`       | TEXT   | NOT NULL, UNIQUE           |
+| `userId`      | UUID   | NOT NULL, FK → `User.id` (`user_id`) |
+| `expiresAt`   | DATE   | NOT NULL (`expires_at`)    |
+| `createdAt`   | DATE   | NOT NULL                   |
+| `updatedAt`   | DATE   | NOT NULL                   |
+
+**Model:** `src/shared/database/models/refresh-token-model.ts`
+**Migration:** `20260916131127-create-refresh-token.js`
+
+```typescript
+class RefreshToken extends Model {
+  declare id: string;
+  declare token: string;
+  declare userId: string;
+  declare expiresAt: Date;
 }
 ```
 
@@ -78,11 +158,11 @@ Company ──┬── User ──── Role ──── Permission
 
 | Tabela          | Campos principais                                                                                                              | Relações                                                         |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| `Company`       | nome, CNPJ, status, endereço                                                                                                   | 1:N com Users, Products, Categories, Suppliers, Customers, Stock |
-| `User`          | name, email, password (+ `company_id`)                                                                                         | N:1 Company, N:1 Role                                            |
+| `Company`       | ✅ nome, CNPJ, status, endereço                                                                                                | 1:N com Users, Products, Categories, Suppliers, Customers, Stock |
+| `User`          | ✅ name, email, password (+ `company_id`, `role`)                                                                               | N:1 Company, N:1 Role                                            |
 | `Role`          | nome, permissões                                                                                                               | 1:N Users, N:N Permissions                                       |
 | `Permission`    | chave (ex: `stock.create`)                                                                                                     | N:N Roles                                                        |
-| `RefreshToken`  | token, user, expiração                                                                                                         | N:1 User                                                         |
+| `RefreshToken`  | ✅ token, user, expiração                                                                                                      | N:1 User                                                         |
 | `Category`      | nome                                                                                                                           | 1:N Products                                                     |
 | `Supplier`      | nome, telefone, email, endereço, CNPJ, contato                                                                                 | 1:N Products                                                     |
 | `Product`       | nome, SKU, código de barras, descrição, preço compra, preço venda, quantidade, estoque mínimo, imagem, peso, dimensões, status | N:1 Category, N:1 Supplier, 1:N StockMovement                    |
@@ -93,6 +173,8 @@ Company ──┬── User ──── Role ──── Permission
 | `Purchase`      | fornecedor, valor, número da nota, data                                                                                        | N:1 Supplier, 1:N PurchaseItem                                   |
 | `PurchaseItem`  | produto, quantidade, valor unitário                                                                                            | N:1 Purchase, N:1 Product                                        |
 | `AuditLog`      | user, action, entity, entity_id, dados                                                                                         | N:1 User                                                         |
+
+> ✅ = já implementado.
 
 ---
 
