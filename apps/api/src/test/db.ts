@@ -14,6 +14,7 @@ beforeAll(async () => {
   const [{ sequelize: db }] = await Promise.all([
     import('../shared/config/database.js'),
     import('../shared/database/models/user-model.js'),
+    import('../shared/database/models/company-model.js'),
     import('../shared/database/models/refresh-token-model.js'),
   ]);
   sequelize = db;
