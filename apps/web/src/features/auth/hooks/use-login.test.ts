@@ -3,12 +3,17 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { ApiError } from '@/shared/api/http-client';
 import { clearTokens, getAccessToken, getRefreshToken } from '@/shared/auth/token-storage';
 
-const { loginServiceMock } = vi.hoisted(() => ({
+const { loginServiceMock, setSessionMock } = vi.hoisted(() => ({
   loginServiceMock: vi.fn(),
+  setSessionMock: vi.fn(),
 }));
 
 vi.mock('../services/login-service', () => ({
   login: loginServiceMock,
+}));
+
+vi.mock('@/shared/auth/use-auth', () => ({
+  useAuth: () => ({ setSession: setSessionMock }),
 }));
 
 import { useLogin } from './use-login';
@@ -70,6 +75,7 @@ describe('useLogin', () => {
     expect(result.current.error).toBeNull();
     expect(getAccessToken()).toBe('access-token');
     expect(getRefreshToken()).toBe('refresh-token');
+    expect(setSessionMock).toHaveBeenCalledWith(response.user, response.company);
   });
 
   it('define error quando o serviço lança ApiError e relança a exceção', async () => {

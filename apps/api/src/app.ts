@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './modules/auth/routes/auth-routes';
 import companyRoutes from './modules/companies/routes/company-routes';
+import userRoutes from './modules/users/routes/user-routes';
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.get('/health', (_req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/companies', companyRoutes);
+app.use('/users', userRoutes);
 
 app.use((err: any, _req: express.Request, res: express.Response, _next: () => void) => {
   console.error('Unhandled error:', err.message || err);

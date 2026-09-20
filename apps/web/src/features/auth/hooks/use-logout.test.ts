@@ -1,71 +1,48 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import {
-  clearTokens,
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
-} from '@/shared/auth/token-storage';
 
-const { logoutServiceMock, navigateMock } = vi.hoisted(() => ({
-  logoutServiceMock: vi.fn(),
+const { logoutSessionMock, navigateMock } = vi.hoisted(() => ({
+  logoutSessionMock: vi.fn(),
   navigateMock: vi.fn(),
 }));
 
-vi.mock('../services/logout-service', () => ({ logout: logoutServiceMock }));
+vi.mock('@/shared/auth/use-auth', () => ({
+  useAuth: () => ({ logout: logoutSessionMock }),
+}));
+
 vi.mock('react-router-dom', () => ({ useNavigate: () => navigateMock }));
 
 import { useLogout } from './use-logout';
 
 describe('useLogout', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    clearTokens();
-  });
+  beforeEach(() => vi.clearAllMocks());
 
-  it('chama o serviço, limpa tokens e navega para /login', async () => {
-    setTokens({ accessToken: 'access-1', refreshToken: 'refresh-1' });
+  it('delega o logout ao contexto e navega para /login', async () => {
+    logoutSessionMock.mockResolvedValue(undefined);
     const { result } = renderHook(() => useLogout());
 
     await act(async () => {
       await result.current.logout();
     });
 
-    expect(logoutServiceMock).toHaveBeenCalledWith('refresh-1');
-    expect(getAccessToken()).toBeNull();
-    expect(getRefreshToken()).toBeNull();
+    expect(logoutSessionMock).toHaveBeenCalledTimes(1);
     expect(navigateMock).toHaveBeenCalledWith('/login', { replace: true });
   });
 
-  it('limpa tokens e navega mesmo se o serviço falhar', async () => {
-    logoutServiceMock.mockRejectedValue(new Error('erro'));
-    setTokens({ accessToken: 'access-1', refreshToken: 'refresh-1' });
+  it('navega mesmo se o logout do contexto falhar', async () => {
+    logoutSessionMock.mockRejectedValue(new Error('erro'));
     const { result } = renderHook(() => useLogout());
 
     await act(async () => {
-      await result.current.logout();
+      await result.current.logout().catch(() => undefined);
     });
 
-    expect(getAccessToken()).toBeNull();
-    expect(getRefreshToken()).toBeNull();
-    expect(navigateMock).toHaveBeenCalledWith('/login', { replace: true });
-  });
-
-  it('não chama o serviço quando não há refresh token', async () => {
-    const { result } = renderHook(() => useLogout());
-
-    await act(async () => {
-      await result.current.logout();
-    });
-
-    expect(logoutServiceMock).not.toHaveBeenCalled();
     expect(navigateMock).toHaveBeenCalledWith('/login', { replace: true });
   });
 
   it('alterna isLoading durante o logout', async () => {
-    setTokens({ accessToken: 'access-1', refreshToken: 'refresh-1' });
     let resolveLogout!: () => void;
-    logoutServiceMock.mockImplementation(
+    logoutSessionMock.mockImplementation(
       () => new Promise<void>((resolve) => (resolveLogout = resolve)),
     );
     const { result } = renderHook(() => useLogout());

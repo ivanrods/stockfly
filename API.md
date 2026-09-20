@@ -278,6 +278,33 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 ---
 
+### `GET /users/me`
+
+> Protegido (`authMiddleware`). Retorna os dados do usuário autenticado, identificado pelo `id` do JWT. A senha nunca é retornada.
+
+**Resposta 200:**
+
+```json
+{
+  "id": "uuid",
+  "name": "João Silva",
+  "email": "joao@example.com",
+  "companyId": "uuid",
+  "role": "admin",
+  "createdAt": "...",
+  "updatedAt": "..."
+}
+```
+
+**Erros:**
+
+| Status | Quando                                   |
+| ------ | ---------------------------------------- |
+| 401    | Token ausente ou inválido                |
+| 404    | Usuário do token não encontrado          |
+
+---
+
 ## Endpoints Planejados
 
 > Derivado do `ROADMAP.md`. Implementar seguindo o padrão feature-module.

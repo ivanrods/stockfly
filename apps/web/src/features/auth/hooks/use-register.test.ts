@@ -3,12 +3,17 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import { ApiError } from '@/shared/api/http-client';
 import { clearTokens, getAccessToken, getRefreshToken } from '@/shared/auth/token-storage';
 
-const { registerServiceMock } = vi.hoisted(() => ({
+const { registerServiceMock, setSessionMock } = vi.hoisted(() => ({
   registerServiceMock: vi.fn(),
+  setSessionMock: vi.fn(),
 }));
 
 vi.mock('../services/register-service', () => ({
   register: registerServiceMock,
+}));
+
+vi.mock('@/shared/auth/use-auth', () => ({
+  useAuth: () => ({ setSession: setSessionMock }),
 }));
 
 import { useRegister } from './use-register';
@@ -93,6 +98,7 @@ describe('useRegister', () => {
     expect(received).toEqual(response);
     expect(getAccessToken()).toBe('access-token');
     expect(getRefreshToken()).toBe('refresh-token');
+    expect(setSessionMock).toHaveBeenCalledWith(response.user, response.company);
   });
 
   it('define error quando o serviço lança ApiError e relança a exceção', async () => {

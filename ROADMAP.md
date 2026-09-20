@@ -118,6 +118,7 @@ O `User.role` (`admin`/`manager`/`operator`/`viewer`) já existe no schema e no 
 
 ### 13. Perfil do Usuário
 
+- [x] `GET /users/me` — dados do usuário autenticado (base para restauração de sessão no frontend)
 - [ ] Alterar senha
 - [ ] Atualizar dados
 - [ ] Atualizar foto
