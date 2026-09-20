@@ -7,6 +7,10 @@ export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [cnpj, setCnpj] = useState('');
+  const [companyPhone, setCompanyPhone] = useState('');
+  const [companyEmail, setCompanyEmail] = useState('');
   const [success, setSuccess] = useState('');
   const { register, isLoading, error } = useRegister();
   const navigate = useNavigate();
@@ -14,12 +18,20 @@ export default function Register() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !companyName) {
       return;
     }
 
     try {
-      const result = await register({ name, email, password });
+      const result = await register({
+        name,
+        email,
+        password,
+        companyName,
+        cnpj: cnpj || undefined,
+        companyPhone: companyPhone || undefined,
+        companyEmail: companyEmail || undefined,
+      });
       setSuccess(result.message);
       navigate('/');
     } catch {
@@ -79,6 +91,48 @@ export default function Register() {
         required
         fullWidth
         helperText="Mínimo de 8 caracteres"
+      />
+
+      <Typography variant="subtitle1" sx={{ mt: 1 }}>
+        Dados da Empresa
+      </Typography>
+
+      <TextField
+        label="Nome da empresa"
+        id="companyName"
+        placeholder="Empresa LTDA"
+        value={companyName}
+        onChange={(e) => setCompanyName(e.target.value)}
+        required
+        fullWidth
+      />
+
+      <TextField
+        label="CNPJ"
+        id="cnpj"
+        placeholder="00.000.000/0000-00"
+        value={cnpj}
+        onChange={(e) => setCnpj(e.target.value)}
+        fullWidth
+      />
+
+      <TextField
+        label="Telefone da empresa"
+        id="companyPhone"
+        placeholder="(00) 00000-0000"
+        value={companyPhone}
+        onChange={(e) => setCompanyPhone(e.target.value)}
+        fullWidth
+      />
+
+      <TextField
+        label="E-mail da empresa"
+        id="companyEmail"
+        type="email"
+        placeholder="contato@empresa.com"
+        value={companyEmail}
+        onChange={(e) => setCompanyEmail(e.target.value)}
+        fullWidth
       />
 
       <Button type="submit" variant="contained" fullWidth disabled={isLoading}>

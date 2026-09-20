@@ -26,7 +26,30 @@ import Register from './register-page';
 
 const response: RegisterResponse = {
   message: 'Usuário criado com sucesso',
-  user: { id: 'user-1', name: 'João', email: 'joao@email.com' },
+  user: {
+    id: 'user-1',
+    name: 'João',
+    email: 'joao@email.com',
+    companyId: 'company-1',
+    role: 'admin',
+  },
+  company: {
+    id: 'company-1',
+    name: 'Empresa LTDA',
+    cnpj: '12345678000190',
+    phone: null,
+    email: null,
+    status: 'active',
+    street: null,
+    number: null,
+    complement: null,
+    neighborhood: null,
+    city: null,
+    state: null,
+    zipCode: null,
+    createdAt: '2026-09-19T00:00:00.000Z',
+    updatedAt: '2026-09-19T00:00:00.000Z',
+  },
   accessToken: 'access-token',
   refreshToken: 'refresh-token',
 };
@@ -41,9 +64,10 @@ describe('Register', () => {
   it('renderiza os campos do formulário', () => {
     render(<Register />);
 
-    expect(screen.getByLabelText(/Nome/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/E-mail/i)).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Nome' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'E-mail' })).toBeInTheDocument();
     expect(screen.getByLabelText(/Senha/i)).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Nome da empresa' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Criar Conta/i })).toBeInTheDocument();
   });
 
@@ -52,15 +76,17 @@ describe('Register', () => {
     mockState.registerMock.mockResolvedValue(response);
     render(<Register />);
 
-    await user.type(screen.getByLabelText(/Nome/i), 'João');
-    await user.type(screen.getByLabelText(/E-mail/i), 'joao@email.com');
+    await user.type(screen.getByRole('textbox', { name: 'Nome' }), 'João');
+    await user.type(screen.getByRole('textbox', { name: 'E-mail' }), 'joao@email.com');
     await user.type(screen.getByLabelText(/Senha/i), '12345678');
+    await user.type(screen.getByRole('textbox', { name: 'Nome da empresa' }), 'Empresa LTDA');
     await user.click(screen.getByRole('button', { name: /Criar Conta/i }));
 
     expect(mockState.registerMock).toHaveBeenCalledWith({
       name: 'João',
       email: 'joao@email.com',
       password: '12345678',
+      companyName: 'Empresa LTDA',
     });
   });
 
@@ -69,9 +95,10 @@ describe('Register', () => {
     mockState.registerMock.mockResolvedValue(response);
     render(<Register />);
 
-    await user.type(screen.getByLabelText(/Nome/i), 'João');
-    await user.type(screen.getByLabelText(/E-mail/i), 'joao@email.com');
+    await user.type(screen.getByRole('textbox', { name: 'Nome' }), 'João');
+    await user.type(screen.getByRole('textbox', { name: 'E-mail' }), 'joao@email.com');
     await user.type(screen.getByLabelText(/Senha/i), '12345678');
+    await user.type(screen.getByRole('textbox', { name: 'Nome da empresa' }), 'Empresa LTDA');
     await user.click(screen.getByRole('button', { name: /Criar Conta/i }));
 
     expect(await screen.findByText('Usuário criado com sucesso')).toBeInTheDocument();
