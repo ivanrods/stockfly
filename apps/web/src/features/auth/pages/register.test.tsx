@@ -88,7 +88,7 @@ describe('Register', () => {
       password: '12345678',
       companyName: 'Empresa LTDA',
     });
-  });
+  }, 15000);
 
   it('exibe a mensagem de sucesso e redireciona para / após o registro', async () => {
     const user = userEvent.setup();

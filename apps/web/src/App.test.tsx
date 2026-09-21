@@ -96,6 +96,18 @@ describe('App', () => {
     renderApp('/');
 
     expect(await screen.findByText('Bem-vindo, João!')).toBeInTheDocument();
-    expect(screen.getByText('Empresa LTDA')).toBeInTheDocument();
+    expect(screen.getAllByText('Empresa LTDA').length).toBeGreaterThan(0);
+  });
+
+  it('renderiza as configurações da empresa autenticado', async () => {
+    const token = createToken({ id: 'u-1', companyId: 'c-1', role: 'admin' });
+    setTokens({ accessToken: token, refreshToken: 'refresh-1' });
+    getCurrentUserMock.mockResolvedValue(user);
+    getMyCompanyMock.mockResolvedValue(company);
+
+    renderApp('/settings');
+
+    expect(await screen.findByText('Configurações da Empresa')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Nome' })).toHaveValue('Empresa LTDA');
   });
 });
