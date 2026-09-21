@@ -27,10 +27,6 @@ class CompanyController {
       return res.status(403).json({ message: 'Acesso negado' });
     }
 
-    if (req.role !== 'admin') {
-      return res.status(403).json({ message: 'Apenas administradores podem alterar a empresa' });
-    }
-
     const parsed = updateCompanySchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({ message: parsed.error.issues[0]!.message });
@@ -52,10 +48,6 @@ class CompanyController {
 
     if (!req.companyId || id !== req.companyId) {
       return res.status(403).json({ message: 'Acesso negado' });
-    }
-
-    if (req.role !== 'admin') {
-      return res.status(403).json({ message: 'Apenas administradores podem inativar a empresa' });
     }
 
     try {

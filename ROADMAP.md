@@ -44,12 +44,11 @@ Empresa é o container principal. Usuário pertence a uma empresa. Nenhuma empre
 
 ### 3. RBAC — Papéis e Permissões
 
-O `User.role` (`admin`/`manager`/`operator`/`viewer`) já existe no schema e no JWT. Falta o RBAC completo:
-
-- [ ] `Role` model + `Permission` model (ou evoluir `role` atual)
-- [ ] Middleware `requireRole()` / `requirePermission()`
-- [ ] Seeds com papéis padrão
-- [ ] Gestão de usuários da empresa (`GET/POST /users`, atribuir papéis)
+- [x] `Role` model + `Permission` model (tabelas globais com matriz de permissões)
+- [x] Middleware `requireRole()` / `requirePermission()`
+- [x] Seeds com papéis padrão (`seedRbac()` no bootstrap e em testes)
+- [x] Gestão de usuários da empresa (`GET/POST /users`, `PUT /users/:id/role`, `GET /roles`)
+- [ ] Papéis customizados por empresa (futuro: `Role.company_id` nullable)
 
 ### 4. Produtos
 

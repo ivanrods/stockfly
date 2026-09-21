@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach } from 'vitest';
 import { Client } from 'pg';
 import type { Sequelize } from 'sequelize';
 import { devUrl, testDbName } from './config.js';
+import { seedRbac } from '../shared/database/seed-rbac.js';
 
 let sequelize: Sequelize | null = null;
 
@@ -16,6 +17,9 @@ beforeAll(async () => {
     import('../shared/database/models/user-model.js'),
     import('../shared/database/models/company-model.js'),
     import('../shared/database/models/refresh-token-model.js'),
+    import('../shared/database/models/role-model.js'),
+    import('../shared/database/models/permission-model.js'),
+    import('../shared/database/models/role-permission-model.js'),
   ]);
   sequelize = db;
   await db.sync({ force: true });
@@ -27,6 +31,7 @@ beforeEach(async () => {
     .map((model) => `"${model.tableName}"`)
     .join(', ');
   if (names) await sequelize.query(`TRUNCATE TABLE ${names} RESTART IDENTITY CASCADE`);
+  await seedRbac();
 });
 
 afterAll(async () => {

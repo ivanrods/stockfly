@@ -19,10 +19,29 @@
 
 **Regra:** rotas protegidas passam pelo middleware `authMiddleware` de `src/shared/middlewares/auth-middleware.ts`. Ele valida o JWT e injeta no `req`: `user`, `companyId` e `role` (`admin`/`manager`/`operator`/`viewer`) extraídos do token.
 
+Autorização adicional por rotas:
+
+- `requireRole('admin', ...)` — exige que o `role` do JWT esteja na lista (`src/shared/middlewares/require-role.ts`)
+- `requirePermission('users:read', ...)` — exige que o papel do usuário tenha pelo menos uma das permissões (lê a matriz `Role`→`Permission` do banco, `src/shared/middlewares/require-permission.ts`)
+
 ```typescript
 import { authMiddleware } from '../shared/middlewares/auth-middleware';
+import { requireRole } from '../shared/middlewares/require-role';
+import { requirePermission } from '../shared/middlewares/require-permission';
 
 router.get('/me', authMiddleware, companyController.getMine.bind(companyController));
+router.put(
+  '/:id',
+  authMiddleware,
+  requireRole('admin'),
+  companyController.update.bind(companyController),
+);
+router.get(
+  '/',
+  authMiddleware,
+  requirePermission('users:read'),
+  userController.list.bind(userController),
+);
 ```
 
 **Multi-tenant:** o JWT carrega `id`, `companyId` e `role`. Módulos de negócio devem escopar consultas e autorizações pelo `req.companyId`.
@@ -61,15 +80,15 @@ router.get('/me', authMiddleware, companyController.getMine.bind(companyControll
 }
 ```
 
-| Campo           | Regras                                                     |
-| --------------- | ---------------------------------------------------------- |
-| `name`          | obrigatório, min 1                                         |
-| `email`         | obrigatório, formato válido                                |
-| `password`      | obrigatório, min 8 caracteres                              |
-| `companyName`   | obrigatório, min 1 — nome da empresa criada                |
-| `cnpj`          | opcional, vazio → `null`; máscara `XX.XXX.XXX/XXXX-XX` ou 14 dígitos (normalizado) |
-| `companyPhone`  | opcional, vazio → `null`                                   |
-| `companyEmail`  | opcional, formato válido, vazio → `null`                   |
+| Campo          | Regras                                                                             |
+| -------------- | ---------------------------------------------------------------------------------- |
+| `name`         | obrigatório, min 1                                                                 |
+| `email`        | obrigatório, formato válido                                                        |
+| `password`     | obrigatório, min 8 caracteres                                                      |
+| `companyName`  | obrigatório, min 1 — nome da empresa criada                                        |
+| `cnpj`         | opcional, vazio → `null`; máscara `XX.XXX.XXX/XXXX-XX` ou 14 dígitos (normalizado) |
+| `companyPhone` | opcional, vazio → `null`                                                           |
+| `companyEmail` | opcional, formato válido, vazio → `null`                                           |
 
 **Resposta 201:**
 
@@ -171,10 +190,10 @@ router.get('/me', authMiddleware, companyController.getMine.bind(companyControll
 
 **Erros:**
 
-| Status | Quando                                   |
-| ------ | ---------------------------------------- |
-| 400    | Sem `refreshToken` no body               |
-| 401    | Token inválido, expirado ou reutilizado  |
+| Status | Quando                                  |
+| ------ | --------------------------------------- |
+| 400    | Sem `refreshToken` no body              |
+| 401    | Token inválido, expirado ou reutilizado |
 
 ---
 
@@ -194,8 +213,8 @@ router.get('/me', authMiddleware, companyController.getMine.bind(companyControll
 { "message": "Logout realizado com sucesso" }
 ```
 
-| Status | Quando                    |
-| ------ | ------------------------- |
+| Status | Quando                     |
+| ------ | -------------------------- |
 | 400    | Sem `refreshToken` no body |
 
 ---
@@ -228,9 +247,9 @@ router.get('/me', authMiddleware, companyController.getMine.bind(companyControll
 
 **Erros:**
 
-| Status | Quando                                       |
-| ------ | -------------------------------------------- |
-| 401    | Token ausente ou inválido                    |
+| Status | Quando                                             |
+| ------ | -------------------------------------------------- |
+| 401    | Token ausente ou inválido                          |
 | 404    | Sem `companyId` no token ou empresa não encontrada |
 
 ---
@@ -251,11 +270,11 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 **Erros:**
 
-| Status | Quando                                              |
-| ------ | --------------------------------------------------- |
-| 401    | Token ausente ou inválido                           |
-| 403    | `:id` ≠ `companyId` ou usuário não é `admin`        |
-| 400    | Validação Zod falhou                                |
+| Status | Quando                                                                   |
+| ------ | ------------------------------------------------------------------------ |
+| 401    | Token ausente ou inválido                                                |
+| 403    | `:id` ≠ `companyId` ou usuário não é `admin`                             |
+| 400    | Validação Zod falhou                                                     |
 | 404    | Empresa não encontrada (`{ "message": "Empresa não encontrada" }` → 400) |
 
 > **Nota:** o controller devolve `400` quando o serviço lança `Error` (incluindo "Empresa não encontrada").
@@ -270,11 +289,11 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 **Erros:**
 
-| Status | Quando                                              |
-| ------ | --------------------------------------------------- |
-| 401    | Token ausente ou inválido                           |
-| 403    | `:id` ≠ `companyId` ou usuário não é `admin`        |
-| 400    | Empresa não encontrada (serviço lança `Error`)      |
+| Status | Quando                                         |
+| ------ | ---------------------------------------------- |
+| 401    | Token ausente ou inválido                      |
+| 403    | `:id` ≠ `companyId` ou usuário não é `admin`   |
+| 400    | Empresa não encontrada (serviço lança `Error`) |
 
 ---
 
@@ -298,10 +317,132 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 **Erros:**
 
+| Status | Quando                          |
+| ------ | ------------------------------- |
+| 401    | Token ausente ou inválido       |
+| 404    | Usuário do token não encontrado |
+
+---
+
+### `GET /users`
+
+> Protegido (`authMiddleware` + `requirePermission('users:read')`). Lista os usuários da empresa do JWT (`companyId`), do mais recente para o mais antigo. A senha nunca é retornada.
+
+**Resposta 200:**
+
+```json
+[
+  {
+    "id": "uuid",
+    "name": "João Silva",
+    "email": "joao@example.com",
+    "companyId": "uuid",
+    "role": "manager",
+    "createdAt": "...",
+    "updatedAt": "..."
+  }
+]
+```
+
+**Erros:**
+
+| Status | Quando                           |
+| ------ | -------------------------------- |
+| 401    | Token ausente ou inválido        |
+| 403    | Papel sem permissão `users:read` |
+| 404    | Sem `companyId` no token         |
+
+---
+
+### `POST /users`
+
+> Protegido (`authMiddleware` + `requirePermission('users:create')`). Cria um usuário na empresa do JWT com a senha hashada (bcrypt).
+
+**Body:**
+
+```json
+{
+  "name": "Maria Souza",
+  "email": "maria@example.com",
+  "password": "minhasenha123",
+  "role": "viewer"
+}
+```
+
+| Campo      | Regras                                                             |
+| ---------- | ------------------------------------------------------------------ |
+| `name`     | obrigatório, min 1                                                 |
+| `email`    | obrigatório, formato válido, único                                 |
+| `password` | obrigatório, min 8 caracteres (hash bcrypt)                        |
+| `role`     | opcional (`admin`/`manager`/`operator`/`viewer`), default `viewer` |
+
+**Resposta 201:** usuário criado (mesmo formato de um item de `GET /users`, sem senha).
+
+**Erros:**
+
 | Status | Quando                                   |
 | ------ | ---------------------------------------- |
 | 401    | Token ausente ou inválido                |
-| 404    | Usuário do token não encontrado          |
+| 403    | Papel sem permissão `users:create`       |
+| 404    | Sem `companyId` no token                 |
+| 400    | Validação Zod falhou ou e-mail já em uso |
+
+---
+
+### `PUT /users/:id/role`
+
+> Protegido (`authMiddleware` + `requirePermission('users:update')`). Atribui um papel a um usuário da própria empresa. Não é permitido alterar o próprio papel.
+
+**Body:**
+
+```json
+{ "role": "manager" }
+```
+
+**Resposta 200:** usuário atualizado com o novo `role` (sem senha).
+
+**Erros:**
+
+| Status | Quando                                                                                 |
+| ------ | -------------------------------------------------------------------------------------- |
+| 401    | Token ausente ou inválido                                                              |
+| 403    | Papel sem permissão `users:update`                                                     |
+| 404    | `:id` ausente/vazia                                                                    |
+| 400    | Usuário não encontrado, de outra empresa, papel inválido ou alteração do próprio papel |
+
+---
+
+### `GET /roles`
+
+> Protegido (`authMiddleware` + `requirePermission('users:read')`). Lista os papéis padrão do sistema (alimentados por `seedRbac()`).
+
+**Resposta 200:**
+
+```json
+[
+  {
+    "id": "uuid",
+    "name": "admin",
+    "description": "Acesso total",
+    "createdAt": "...",
+    "updatedAt": "..."
+  },
+  {
+    "id": "uuid",
+    "name": "viewer",
+    "description": "Apenas visualização",
+    "createdAt": "...",
+    "updatedAt": "..."
+  }
+]
+```
+
+**Erros:**
+
+| Status | Quando                           |
+| ------ | -------------------------------- |
+| 401    | Token ausente ou inválido        |
+| 403    | Papel sem permissão `users:read` |
 
 ---
 
@@ -323,12 +464,10 @@ Já implementado: `GET /companies/me`, `PUT /companies/:id`, `DELETE /companies/
 
 ### Users & RBAC
 
-- `GET /users` — listar usuários da empresa (protegido)
-- `POST /users` — criar usuário (protegido)
-- `PUT /users/:id` — atualizar (protegido)
-- `PUT /users/:id/role` — atribuir papel (admin)
-- `DELETE /users/:id` — inativar (protegido)
-- `GET /roles` — listar papéis
+Já implementado: `GET /users`, `POST /users`, `PUT /users/:id/role`, `GET /roles`.
+
+- `PUT /users/:id` — atualizar usuário (protegido)
+- `DELETE /users/:id` — inativar usuário (protegido)
 
 ### Products
 

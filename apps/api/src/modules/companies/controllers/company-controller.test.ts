@@ -107,15 +107,6 @@ describe('CompanyController.update', () => {
     expect(res.statusCode).toBe(403);
   });
 
-  it('retorna 403 quando role não é admin', async () => {
-    const res = makeRes();
-    await companyController.update(
-      makeReq({ params: { id: 'c-1' }, companyId: 'c-1', role: 'viewer' }),
-      res,
-    );
-    expect(res.statusCode).toBe(403);
-  });
-
   it('retorna 400 com body inválido', async () => {
     const res = makeRes();
     await companyController.update(
@@ -165,15 +156,6 @@ describe('CompanyController.inactivate', () => {
     const res = makeRes();
     await companyController.inactivate(
       makeReq({ params: { id: 'outro' }, companyId: 'c-1', role: 'admin' }),
-      res,
-    );
-    expect(res.statusCode).toBe(403);
-  });
-
-  it('retorna 403 quando role não é admin', async () => {
-    const res = makeRes();
-    await companyController.inactivate(
-      makeReq({ params: { id: 'c-1' }, companyId: 'c-1', role: 'manager' }),
       res,
     );
     expect(res.statusCode).toBe(403);
