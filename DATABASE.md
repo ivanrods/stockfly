@@ -211,9 +211,148 @@ Tabela de junção `Role` × `Permission` (matriz de permissões de cada papel).
 
 ---
 
+### `Category`
+
+Catálogo de categorias de produtos, escopado por empresa. Soft delete (`paranoid: true`).
+
+| Coluna        | Tipo   | Restrições                                   |
+| ------------- | ------ | -------------------------------------------- |
+| `id`          | UUID   | PK, default UUIDV4                           |
+| `companyId`   | UUID   | NOT NULL, FK → `Company.id` (`company_id`)   |
+| `name`        | STRING | NOT NULL                                     |
+| `description` | STRING | NULL                                         |
+| `deletedAt`   | DATE   | NULL (`deleted_at`, soft delete)             |
+| `createdAt`   | DATE   | NOT NULL                                     |
+| `updatedAt`   | DATE   | NOT NULL                                     |
+
+**Relações:** `Category.belongsTo(Company)` (alias `company`); `Company.hasMany(Category)` (alias `categories`); `Category.hasMany(Product)` (alias `products`).
+
+**Model:** `src/shared/database/models/category-model.ts`
+**Migration:** `20260922000100-create-category.js`
+
+```typescript
+class Category extends Model {
+  declare id: string;
+  declare companyId: string;
+  declare name: string;
+  declare description: string | null;
+  declare deletedAt: Date | null;
+}
+```
+
+---
+
+### `Supplier`
+
+Catálogo de fornecedores, escopado por empresa. Soft delete (`paranoid: true`).
+
+| Coluna        | Tipo      | Restrições                                   |
+| ------------- | --------- | -------------------------------------------- |
+| `id`          | UUID      | PK, default UUIDV4                           |
+| `companyId`   | UUID      | NOT NULL, FK → `Company.id` (`company_id`)   |
+| `name`        | STRING    | NOT NULL                                     |
+| `contactName` | STRING    | NULL (`contact_name`)                        |
+| `phone`       | STRING    | NULL                                         |
+| `email`       | STRING    | NULL                                         |
+| `cnpj`        | STRING    | NULL (14 dígitos normalizado)                |
+| `street`      | STRING    | NULL                                         |
+| `number`      | STRING    | NULL                                         |
+| `complement`  | STRING    | NULL                                         |
+| `neighborhood`| STRING    | NULL                                         |
+| `city`        | STRING    | NULL                                         |
+| `state`       | STRING(2) | NULL (UF)                                    |
+| `zipCode`     | STRING    | NULL (`zip_code`)                            |
+| `deletedAt`   | DATE      | NULL (`deleted_at`, soft delete)             |
+| `createdAt`   | DATE      | NOT NULL                                     |
+| `updatedAt`   | DATE      | NOT NULL                                     |
+
+**Relações:** `Supplier.belongsTo(Company)` (alias `company`); `Company.hasMany(Supplier)` (alias `suppliers`); `Supplier.hasMany(Product)` (alias `products`).
+
+**Model:** `src/shared/database/models/supplier-model.ts`
+**Migration:** `20260922000200-create-supplier.js`
+
+```typescript
+class Supplier extends Model {
+  declare id: string;
+  declare companyId: string;
+  declare name: string;
+  declare contactName: string | null;
+  declare phone: string | null;
+  declare email: string | null;
+  declare cnpj: string | null;
+  declare street: string | null;
+  declare number: string | null;
+  declare complement: string | null;
+  declare neighborhood: string | null;
+  declare city: string | null;
+  declare state: string | null;
+  declare zipCode: string | null;
+  declare deletedAt: Date | null;
+}
+```
+
+---
+
+### `Product`
+
+Produtos do estoque, escopados por empresa. Soft delete (`paranoid: true`).
+
+| Coluna          | Tipo              | Restrições                                      |
+| --------------- | ----------------- | ----------------------------------------------- |
+| `id`            | UUID              | PK, default UUIDV4                              |
+| `companyId`     | UUID              | NOT NULL, FK → `Company.id` (`company_id`)      |
+| `name`          | STRING            | NOT NULL                                        |
+| `sku`           | STRING            | NULL                                            |
+| `barcode`       | STRING            | NULL                                            |
+| `description`   | TEXT              | NULL                                            |
+| `purchasePrice` | DECIMAL(10,2)     | NULL (`purchase_price`)                         |
+| `salePrice`     | DECIMAL(10,2)     | NULL (`sale_price`)                             |
+| `quantity`      | INTEGER           | NOT NULL, default `0` (estoque atual)           |
+| `minStock`      | INTEGER           | NOT NULL, default `0` (`min_stock`)             |
+| `categoryId`    | UUID              | NULL, FK → `Category.id` (`category_id`, SET NULL) |
+| `supplierId`    | UUID              | NULL, FK → `Supplier.id` (`supplier_id`, SET NULL) |
+| `imageUrl`      | STRING            | NULL (`image_url`)                              |
+| `weight`        | DECIMAL(10,3)     | NULL                                            |
+| `dimensions`    | JSON              | NULL (`{ length, width, height }`)              |
+| `status`        | ENUM              | `active`/`inactive`, NOT NULL, default `active` |
+| `deletedAt`     | DATE              | NULL (`deleted_at`, soft delete)                |
+| `createdAt`     | DATE              | NOT NULL                                        |
+| `updatedAt`     | DATE              | NOT NULL                                        |
+
+**Relações:** `Product.belongsTo(Company)` (alias `company`); `Product.belongsTo(Category)` (alias `category`); `Product.belongsTo(Supplier)` (alias `supplier`). FKs `category_id`/`supplier_id` são anuladas (SET NULL) também no soft delete via hook `beforeDestroy`.
+
+**Model:** `src/shared/database/models/product-model.ts`
+**Migration:** `20260922000300-create-product.js`
+
+```typescript
+type ProductStatus = 'active' | 'inactive';
+
+class Product extends Model {
+  declare id: string;
+  declare companyId: string;
+  declare name: string;
+  declare sku: string | null;
+  declare barcode: string | null;
+  declare description: string | null;
+  declare purchasePrice: number | null;
+  declare salePrice: number | null;
+  declare quantity: number;
+  declare minStock: number;
+  declare categoryId: string | null;
+  declare supplierId: string | null;
+  declare imageUrl: string | null;
+  declare weight: number | null;
+  declare dimensions: Record<string, number> | null;
+  declare status: ProductStatus;
+  declare deletedAt: Date | null;
+}
+```
+
+---
+
 ## Schema Planejado
 
-> Ainda não implementado. Consulte `ROADMAP.md` para prioridade e ordem de implementação.
+> Parcialmente implementado (Category, Supplier e Product já estão no Schema Atual acima). Consulte `ROADMAP.md` para prioridade e ordem de implementação.
 
 ### Modelagem alvo
 
@@ -237,9 +376,9 @@ Company ──┬── User ──── Role ──── Permission
 | `Role`          | ✅ nome, descrição, permissões (matriz em `RolePermission`)                                                                    | 1:N Users, N:N Permissions                                       |
 | `Permission`    | ✅ chave (ex: `stock.create`, `users:read`), descrição                                                                         | N:N Roles                                                        |
 | `RefreshToken`  | ✅ token, user, expiração                                                                                                      | N:1 User                                                         |
-| `Category`      | nome                                                                                                                           | 1:N Products                                                     |
-| `Supplier`      | nome, telefone, email, endereço, CNPJ, contato                                                                                 | 1:N Products                                                     |
-| `Product`       | nome, SKU, código de barras, descrição, preço compra, preço venda, quantidade, estoque mínimo, imagem, peso, dimensões, status | N:1 Category, N:1 Supplier, 1:N StockMovement                    |
+| `Category`      | ✅ nome, descrição                                                                                                             | 1:N Products                                                     |
+| `Supplier`      | ✅ nome, telefone, email, endereço, CNPJ, contato                                                                               | 1:N Products                                                     |
+| `Product`       | ✅ nome, SKU, código de barras, descrição, preço compra, preço venda, quantidade, estoque mínimo, imagem, peso, dimensões, status | N:1 Category, N:1 Supplier, 1:N StockMovement                  |
 | `StockMovement` | tipo (entrada/saída), quantidade, motivo, valor unitário, nota, data, responsável                                              | N:1 Product, N:1 User (responsável)                              |
 | `Customer`      | nome, telefone, email, endereço, CPF/CNPJ                                                                                      | 1:N Sale                                                         |
 | `Sale`          | total, data, cliente                                                                                                           | N:1 Customer, 1:N SaleItem                                       |

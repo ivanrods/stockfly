@@ -20,6 +20,9 @@ beforeAll(async () => {
     import('../shared/database/models/role-model.js'),
     import('../shared/database/models/permission-model.js'),
     import('../shared/database/models/role-permission-model.js'),
+    import('../shared/database/models/category-model.js'),
+    import('../shared/database/models/supplier-model.js'),
+    import('../shared/database/models/product-model.js'),
   ]);
   sequelize = db;
   await db.sync({ force: true });

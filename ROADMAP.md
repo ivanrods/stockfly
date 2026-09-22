@@ -17,6 +17,9 @@
 - [x] CI/CD básico (GitHub Actions: lint, typecheck, build, test)
 - [x] Refresh token (renovar access token + logout)
 - [x] Multi-tenant: `Company` + `User.company_id` + `User.role` + JWT `{ id, companyId, role }`
+- [x] Categorias: `Category` model + CRUD (soft delete) escopado por empresa (`categories:*`)
+- [x] Fornecedores: `Supplier` model + CRUD (soft delete) escopado por empresa (`suppliers:*`)
+- [x] Produtos: `Product` model + CRUD com paginação, busca e filtros (soft delete), FKs Category/Supplier (`products:*`)
 
 **Detalhe do que já existe:** ver `AGENTS.md`.
 
@@ -52,22 +55,22 @@ Empresa é o container principal. Usuário pertence a uma empresa. Nenhuma empre
 
 ### 4. Produtos
 
-- [ ] `Product` model: nome, SKU, código de barras, descrição, preço compra, preço venda, quantidade, estoque mínimo, categoria FK, fornecedor FK, imagem, peso, dimensões, status
-- [ ] CRUD (com paginação, ordenação, filtros, soft delete)
-- [ ] Busca por nome, SKU, código de barras
-- [ ] Filtros: categoria, fornecedor, estoque baixo, ativo/inativo
+- [x] `Product` model: nome, SKU, código de barras, descrição, preço compra, preço venda, quantidade, estoque mínimo, categoria FK, fornecedor FK, imagem, peso, dimensões, status
+- [x] CRUD (com paginação, ordenação, filtros, soft delete)
+- [x] Busca por nome, SKU, código de barras
+- [x] Filtros: categoria, fornecedor, estoque baixo, ativo/inativo
 - [ ] Upload de imagem (local → MinIO/S3 depois)
 
 ### 5. Categorias
 
-- [ ] `Category` model (nome, descrição?)
-- [ ] CRUD
-- [ ] Exemplos: Informática, Celulares, Escritório, Ferramentas, Roupas
+- [x] `Category` model (nome, descrição?)
+- [x] CRUD
+- [x] Exemplos: Informática, Celulares, Escritório, Ferramentas, Roupas
 
 ### 6. Fornecedores
 
-- [ ] `Supplier` model: nome, telefone, email, endereço, CNPJ, contato
-- [ ] CRUD
+- [x] `Supplier` model: nome, telefone, email, endereço, CNPJ, contato
+- [x] CRUD
 
 ### 7. Clientes
 

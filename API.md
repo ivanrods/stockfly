@@ -446,6 +446,304 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 ---
 
+### `GET /categories`
+
+> Protegido (`authMiddleware` + `requirePermission('categories:read')`). Lista as categorias da empresa do JWT, ordenadas por nome. Categorias removidas (soft delete) não aparecem.
+
+**Resposta 200:**
+
+```json
+[
+  {
+    "id": "uuid",
+    "companyId": "uuid",
+    "name": "Informática",
+    "description": "Hardware e periféricos",
+    "deletedAt": null,
+    "createdAt": "...",
+    "updatedAt": "..."
+  }
+]
+```
+
+**Erros:**
+
+| Status | Quando                           |
+| ------ | -------------------------------- |
+| 401    | Token ausente ou inválido        |
+| 403    | Papel sem permissão `categories:read` |
+| 404    | Sem `companyId` no token         |
+
+---
+
+### `POST /categories`
+
+> Protegido (`authMiddleware` + `requirePermission('categories:create')`). Cria uma categoria na empresa do JWT.
+
+**Body:**
+
+```json
+{ "name": "Informática", "description": "Hardware e periféricos" }
+```
+
+| Campo         | Regras                        |
+| ------------- | ----------------------------- |
+| `name`        | obrigatório, min 1            |
+| `description` | opcional, vazio → `null`      |
+
+**Resposta 201:** categoria criada (mesmo formato de um item de `GET /categories`).
+
+**Erros:**
+
+| Status | Quando                           |
+| ------ | -------------------------------- |
+| 401    | Token ausente ou inválido        |
+| 403    | Papel sem permissão `categories:create` |
+| 404    | Sem `companyId` no token         |
+| 400    | Validação Zod falhou             |
+
+---
+
+### `PUT /categories/:id`
+
+> Protegido (`authMiddleware` + `requirePermission('categories:update')`). Atualiza uma categoria da própria empresa.
+
+**Body (parcial):** mesmo schema do `POST`, campos opcionais.
+
+**Resposta 200:** categoria atualizada.
+
+**Erros:**
+
+| Status | Quando                                              |
+| ------ | --------------------------------------------------- |
+| 401    | Token ausente ou inválido                           |
+| 403    | Papel sem permissão `categories:update`             |
+| 404    | Sem `companyId` no token                            |
+| 400    | Validação falhou ou categoria inexistente/de outra empresa |
+
+---
+
+### `DELETE /categories/:id`
+
+> Protegido (`authMiddleware` + `requirePermission('categories:delete')`). Remove a categoria (soft delete). Produtos vinculados têm `categoryId` anulado (hook `beforeDestroy`).
+
+**Resposta 200:** categoria removida (campos originais).
+
+**Erros:**
+
+| Status | Quando                                              |
+| ------ | --------------------------------------------------- |
+| 401    | Token ausente ou inválido                           |
+| 403    | Papel sem permissão `categories:delete`             |
+| 404    | Sem `companyId` no token                            |
+| 400    | Categoria inexistente/de outra empresa              |
+
+---
+
+### `GET /suppliers`
+
+> Protegido (`authMiddleware` + `requirePermission('suppliers:read')`). Lista os fornecedores da empresa do JWT, ordenados por nome.
+
+**Resposta 200:** array de fornecedores (campos: `id`, `companyId`, `name`, `contactName`, `phone`, `email`, `cnpj`, `street`, `number`, `complement`, `neighborhood`, `city`, `state`, `zipCode`, timestamps).
+
+**Erros:** mesmos padrões de `/categories` (401/403/404), usando permissão `suppliers:read`.
+
+---
+
+### `POST /suppliers`
+
+> Protegido (`authMiddleware` + `requirePermission('suppliers:create')`). Cria um fornecedor na empresa do JWT.
+
+**Body:**
+
+```json
+{
+  "name": "Tech Distribuidora",
+  "contactName": "Carlos",
+  "phone": "(11) 99999-0000",
+  "email": "contato@tech.com",
+  "cnpj": "12.345.678/0001-90",
+  "city": "São Paulo",
+  "state": "sp"
+}
+```
+
+| Campo          | Regras                                       |
+| -------------- | -------------------------------------------- |
+| `name`         | obrigatório, min 1                           |
+| `contactName`  | opcional, vazio → `null`                     |
+| `phone`        | opcional, vazio → `null`                     |
+| `email`        | opcional, formato válido, vazio → `null`     |
+| `cnpj`         | opcional, máscara ou 14 dígitos (normalizado)|
+| endereço       | opcional (STR separado, `state` = UF 2 letras, maiúsculo) |
+
+**Resposta 201:** fornecedor criado.
+
+**Erros:** mesmos padrões, usando permissão `suppliers:create` (400 em validação).
+
+---
+
+### `PUT /suppliers/:id` e `DELETE /suppliers/:id`
+
+> Protegido (`authMiddleware` + `requirePermission('suppliers:update' | 'suppliers:delete')`). Atualiza ou remove (soft delete) um fornecedor da própria empresa.
+
+**Respostas:** 200 com o fornecedor atualizado/removido. Ao remover, produtos vinculados têm `supplierId` anulado.
+
+**Erros:** mesmos padrões de `/categories` (401/403/400), usando as permissões `suppliers:*`.
+
+---
+
+### `GET /products`
+
+> Protegido (`authMiddleware` + `requirePermission('products:read')`). Lista produtos da empresa com paginação, busca e filtros. Produtos removidos (soft delete) não aparecem.
+
+**Query params:**
+
+| Param        | Tipo    | Regras                                        |
+| ------------ | ------- | --------------------------------------------- |
+| `page`       | number  | default `1`, mínimo `1`                       |
+| `limit`      | number  | default `20`, `1`–`100`                       |
+| `q`          | string  | busca por nome, SKU ou código de barras       |
+| `categoryId` | string  | filtra por categoria                          |
+| `supplierId` | string  | filtra por fornecedor                         |
+| `status`     | enum    | `active`/`inactive`                           |
+| `lowStock`   | boolean | `true` → produtos com `quantity <= minStock`  |
+
+**Resposta 200:**
+
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "companyId": "uuid",
+      "name": "Notebook",
+      "sku": "NB-001",
+      "barcode": null,
+      "description": null,
+      "purchasePrice": "2500.00",
+      "salePrice": "3299.90",
+      "quantity": 10,
+      "minStock": 2,
+      "categoryId": "uuid",
+      "supplierId": null,
+      "imageUrl": null,
+      "weight": null,
+      "dimensions": null,
+      "status": "active",
+      "category": { "id": "uuid", "name": "Informática" },
+      "supplier": null,
+      "deletedAt": null,
+      "createdAt": "...",
+      "updatedAt": "..."
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 20,
+  "totalPages": 1
+}
+```
+
+> `price` e `weight` (DECIMAL) vêm como string; `category`/`supplier` são objetos embutidos com `id` e `name`.
+
+**Erros:**
+
+| Status | Quando                                  |
+| ------ | --------------------------------------- |
+| 401    | Token ausente ou inválido               |
+| 403    | Papel sem permissão `products:read`     |
+| 404    | Sem `companyId` no token                |
+| 400    | Query inválida (ex: `page` não numérico)|
+
+---
+
+### `POST /products`
+
+> Protegido (`authMiddleware` + `requirePermission('products:create')`). Cria um produto na empresa do JWT.
+
+**Body:**
+
+```json
+{
+  "name": "Notebook",
+  "sku": "NB-001",
+  "barcode": "7891234567890",
+  "description": "Notebook 16GB",
+  "purchasePrice": "2500.00",
+  "salePrice": "3299.90",
+  "quantity": 10,
+  "minStock": 2,
+  "categoryId": "uuid",
+  "supplierId": "uuid",
+  "weight": "1.800",
+  "dimensions": { "length": 30, "width": 20, "height": 2 },
+  "status": "active"
+}
+```
+
+| Campo          | Regras                                                    |
+| -------------- | --------------------------------------------------------- |
+| `name`         | obrigatório, min 1                                        |
+| `sku`, `barcode`, `description`, `imageUrl` | opcional, vazio → `null`                 |
+| `purchasePrice`, `salePrice`, `weight` | opcional, ≥ 0                             |
+| `quantity`, `minStock` | opcional, inteiro ≥ 0, default `0`                    |
+| `categoryId`, `supplierId` | opcional (devem pertencer à empresa)               |
+| `dimensions`   | opcional, objeto de números                                |
+| `status`       | opcional (`active`/`inactive`), default `active`          |
+
+**Resposta 201:** produto criado (mesmo formato de um item de `GET /products`, sem `category`/`supplier` embutidos).
+
+**Erros:** mesmos padrões (400 em validação), usando permissão `products:create`.
+
+---
+
+### `GET /products/:id`
+
+> Protegido (`authMiddleware` + `requirePermission('products:read')`). Retorna o produto da empresa com `category` e `supplier` embutidos.
+
+**Resposta 200:** mesmo formato do item de `GET /products`, com `category`/`supplier`.
+
+**Erros:**
+
+| Status | Quando                                              |
+| ------ | --------------------------------------------------- |
+| 401    | Token ausente ou inválido                           |
+| 403    | Papel sem permissão `products:read`                 |
+| 404    | Sem `companyId` no token                            |
+| 400    | Produto inexistente/de outra empresa                |
+
+---
+
+### `PUT /products/:id`
+
+> Protegido (`authMiddleware` + `requirePermission('products:update')`). Atualiza um produto da própria empresa.
+
+**Body (parcial):** mesmo schema do `POST`, campos opcionais (sem defaults — campos não enviados não são alterados).
+
+**Resposta 200:** produto atualizado.
+
+**Erros:** mesmos padrões (401/403/400), usando permissão `products:update`.
+
+---
+
+### `DELETE /products/:id`
+
+> Protegido (`authMiddleware` + `requirePermission('products:delete')`). Remove o produto (soft delete) — `deletedAt` é preenchido e o produto some das listagens.
+
+**Resposta 200:** produto removido (campos originais).
+
+**Erros:**
+
+| Status | Quando                                              |
+| ------ | --------------------------------------------------- |
+| 401    | Token ausente ou inválido                           |
+| 403    | Papel sem permissão `products:delete`               |
+| 404    | Sem `companyId` no token                            |
+| 400    | Produto inexistente/de outra empresa                |
+
+---
+
 ## Endpoints Planejados
 
 > Derivado do `ROADMAP.md`. Implementar seguindo o padrão feature-module.
@@ -471,16 +769,15 @@ Já implementado: `GET /users`, `POST /users`, `PUT /users/:id/role`, `GET /role
 
 ### Products
 
-- `GET /products` — listar (paginação, filtros, busca)
-- `POST /products` — criar (protegido)
-- `GET /products/:id` — detalhe (protegido)
-- `PUT /products/:id` — atualizar (protegido)
-- `DELETE /products/:id` — soft delete (protegido)
+Já implementado: `GET /products`, `POST /products`, `GET /products/:id`, `PUT /products/:id`, `DELETE /products/:id` (com paginação, busca e filtros).
+
 - `POST /products/:id/image` — upload de imagem (protegido)
 
-### Categories & Suppliers & Customers
+### Categories, Suppliers & Customers
 
-- CRUD em `/categories`, `/suppliers`, `/customers` (padrão acima, protegido)
+Já implementado: CRUD completo em `/categories` e `/suppliers` (protegido, escopado por empresa, soft delete).
+
+- CRUD em `/customers` (padrão acima, protegido)
 
 ### Stock
 
