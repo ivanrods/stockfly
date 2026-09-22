@@ -27,8 +27,6 @@ module.exports = {
     await queryInterface.removeIndex('User', ['company_id']);
     await queryInterface.removeColumn('User', 'role');
     await queryInterface.removeColumn('User', 'company_id');
-    await queryInterface.sequelize.query(
-      `DROP TYPE IF EXISTS "enum_User_role";`,
-    );
+    await queryInterface.sequelize.query(`DROP TYPE IF EXISTS "enum_User_role";`);
   },
 };

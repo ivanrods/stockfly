@@ -1,9 +1,5 @@
 import productRepository from '../repository/product-repository.js';
-import {
-  CreateProductDTO,
-  UpdateProductDTO,
-  ProductQueryDTO,
-} from '../dto/product-dto.js';
+import { CreateProductDTO, UpdateProductDTO, ProductQueryDTO } from '../dto/product-dto.js';
 
 class ProductService {
   async list(companyId: string, query: ProductQueryDTO) {

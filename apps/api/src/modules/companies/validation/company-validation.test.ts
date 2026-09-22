@@ -52,7 +52,9 @@ describe('createCompanySchema', () => {
   });
 
   it('rejeita e-mail inválido', () => {
-    expect(createCompanySchema.safeParse({ name: 'Empresa', email: 'invalido' }).success).toBe(false);
+    expect(createCompanySchema.safeParse({ name: 'Empresa', email: 'invalido' }).success).toBe(
+      false,
+    );
   });
 
   it('rejeita UF inválida', () => {

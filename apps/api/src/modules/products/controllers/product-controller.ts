@@ -5,11 +5,7 @@ import {
   updateProductSchema,
   productQuerySchema,
 } from '../validation/product-validation.js';
-import {
-  CreateProductDTO,
-  UpdateProductDTO,
-  ProductQueryDTO,
-} from '../dto/product-dto.js';
+import { CreateProductDTO, UpdateProductDTO, ProductQueryDTO } from '../dto/product-dto.js';
 
 class ProductController {
   async list(req: Request, res: Response) {

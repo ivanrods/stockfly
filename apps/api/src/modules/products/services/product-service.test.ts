@@ -22,7 +22,12 @@ import productService from './product-service.js';
 import type { CreateProductDTO, ProductQueryDTO } from '../dto/product-dto.js';
 
 const product = { id: 'p-1', companyId: 'c-1', name: 'Notebook' };
-const createData = { name: 'Notebook', quantity: 0, minStock: 0, status: 'active' } as CreateProductDTO;
+const createData = {
+  name: 'Notebook',
+  quantity: 0,
+  minStock: 0,
+  status: 'active',
+} as CreateProductDTO;
 const query: ProductQueryDTO = { page: 1, limit: 20, lowStock: undefined };
 
 describe('ProductService.list', () => {

@@ -47,7 +47,13 @@ describe('AuthRepository', () => {
   });
 
   it('create chama User.create com os dados e sem transação', async () => {
-    const data = { email: 'a@b.com', password: 'hash', name: 'João', companyId: 'c-1', role: 'admin' as const };
+    const data = {
+      email: 'a@b.com',
+      password: 'hash',
+      name: 'João',
+      companyId: 'c-1',
+      role: 'admin' as const,
+    };
     userCreateMock.mockResolvedValue({ id: '1' });
 
     await authRepository.create(data);
@@ -56,7 +62,13 @@ describe('AuthRepository', () => {
   });
 
   it('create repassa a transação para User.create', async () => {
-    const data = { email: 'a@b.com', password: 'hash', name: 'João', companyId: 'c-1', role: 'admin' as const };
+    const data = {
+      email: 'a@b.com',
+      password: 'hash',
+      name: 'João',
+      companyId: 'c-1',
+      role: 'admin' as const,
+    };
     const transaction = { id: 'tx' } as unknown as Transaction;
     userCreateMock.mockResolvedValue({ id: '1' });
 

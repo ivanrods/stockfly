@@ -468,11 +468,11 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 **Erros:**
 
-| Status | Quando                           |
-| ------ | -------------------------------- |
-| 401    | Token ausente ou inválido        |
+| Status | Quando                                |
+| ------ | ------------------------------------- |
+| 401    | Token ausente ou inválido             |
 | 403    | Papel sem permissão `categories:read` |
-| 404    | Sem `companyId` no token         |
+| 404    | Sem `companyId` no token              |
 
 ---
 
@@ -486,21 +486,21 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 { "name": "Informática", "description": "Hardware e periféricos" }
 ```
 
-| Campo         | Regras                        |
-| ------------- | ----------------------------- |
-| `name`        | obrigatório, min 1            |
-| `description` | opcional, vazio → `null`      |
+| Campo         | Regras                   |
+| ------------- | ------------------------ |
+| `name`        | obrigatório, min 1       |
+| `description` | opcional, vazio → `null` |
 
 **Resposta 201:** categoria criada (mesmo formato de um item de `GET /categories`).
 
 **Erros:**
 
-| Status | Quando                           |
-| ------ | -------------------------------- |
-| 401    | Token ausente ou inválido        |
+| Status | Quando                                  |
+| ------ | --------------------------------------- |
+| 401    | Token ausente ou inválido               |
 | 403    | Papel sem permissão `categories:create` |
-| 404    | Sem `companyId` no token         |
-| 400    | Validação Zod falhou             |
+| 404    | Sem `companyId` no token                |
+| 400    | Validação Zod falhou                    |
 
 ---
 
@@ -514,11 +514,11 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 **Erros:**
 
-| Status | Quando                                              |
-| ------ | --------------------------------------------------- |
-| 401    | Token ausente ou inválido                           |
-| 403    | Papel sem permissão `categories:update`             |
-| 404    | Sem `companyId` no token                            |
+| Status | Quando                                                     |
+| ------ | ---------------------------------------------------------- |
+| 401    | Token ausente ou inválido                                  |
+| 403    | Papel sem permissão `categories:update`                    |
+| 404    | Sem `companyId` no token                                   |
 | 400    | Validação falhou ou categoria inexistente/de outra empresa |
 
 ---
@@ -531,12 +531,12 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 **Erros:**
 
-| Status | Quando                                              |
-| ------ | --------------------------------------------------- |
-| 401    | Token ausente ou inválido                           |
-| 403    | Papel sem permissão `categories:delete`             |
-| 404    | Sem `companyId` no token                            |
-| 400    | Categoria inexistente/de outra empresa              |
+| Status | Quando                                  |
+| ------ | --------------------------------------- |
+| 401    | Token ausente ou inválido               |
+| 403    | Papel sem permissão `categories:delete` |
+| 404    | Sem `companyId` no token                |
+| 400    | Categoria inexistente/de outra empresa  |
 
 ---
 
@@ -568,14 +568,14 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 }
 ```
 
-| Campo          | Regras                                       |
-| -------------- | -------------------------------------------- |
-| `name`         | obrigatório, min 1                           |
-| `contactName`  | opcional, vazio → `null`                     |
-| `phone`        | opcional, vazio → `null`                     |
-| `email`        | opcional, formato válido, vazio → `null`     |
-| `cnpj`         | opcional, máscara ou 14 dígitos (normalizado)|
-| endereço       | opcional (STR separado, `state` = UF 2 letras, maiúsculo) |
+| Campo         | Regras                                                    |
+| ------------- | --------------------------------------------------------- |
+| `name`        | obrigatório, min 1                                        |
+| `contactName` | opcional, vazio → `null`                                  |
+| `phone`       | opcional, vazio → `null`                                  |
+| `email`       | opcional, formato válido, vazio → `null`                  |
+| `cnpj`        | opcional, máscara ou 14 dígitos (normalizado)             |
+| endereço      | opcional (STR separado, `state` = UF 2 letras, maiúsculo) |
 
 **Resposta 201:** fornecedor criado.
 
@@ -599,15 +599,15 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 **Query params:**
 
-| Param        | Tipo    | Regras                                        |
-| ------------ | ------- | --------------------------------------------- |
-| `page`       | number  | default `1`, mínimo `1`                       |
-| `limit`      | number  | default `20`, `1`–`100`                       |
-| `q`          | string  | busca por nome, SKU ou código de barras       |
-| `categoryId` | string  | filtra por categoria                          |
-| `supplierId` | string  | filtra por fornecedor                         |
-| `status`     | enum    | `active`/`inactive`                           |
-| `lowStock`   | boolean | `true` → produtos com `quantity <= minStock`  |
+| Param        | Tipo    | Regras                                       |
+| ------------ | ------- | -------------------------------------------- |
+| `page`       | number  | default `1`, mínimo `1`                      |
+| `limit`      | number  | default `20`, `1`–`100`                      |
+| `q`          | string  | busca por nome, SKU ou código de barras      |
+| `categoryId` | string  | filtra por categoria                         |
+| `supplierId` | string  | filtra por fornecedor                        |
+| `status`     | enum    | `active`/`inactive`                          |
+| `lowStock`   | boolean | `true` → produtos com `quantity <= minStock` |
 
 **Resposta 200:**
 
@@ -649,12 +649,12 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 **Erros:**
 
-| Status | Quando                                  |
-| ------ | --------------------------------------- |
-| 401    | Token ausente ou inválido               |
-| 403    | Papel sem permissão `products:read`     |
-| 404    | Sem `companyId` no token                |
-| 400    | Query inválida (ex: `page` não numérico)|
+| Status | Quando                                   |
+| ------ | ---------------------------------------- |
+| 401    | Token ausente ou inválido                |
+| 403    | Papel sem permissão `products:read`      |
+| 404    | Sem `companyId` no token                 |
+| 400    | Query inválida (ex: `page` não numérico) |
 
 ---
 
@@ -682,15 +682,15 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 }
 ```
 
-| Campo          | Regras                                                    |
-| -------------- | --------------------------------------------------------- |
-| `name`         | obrigatório, min 1                                        |
-| `sku`, `barcode`, `description`, `imageUrl` | opcional, vazio → `null`                 |
-| `purchasePrice`, `salePrice`, `weight` | opcional, ≥ 0                             |
-| `quantity`, `minStock` | opcional, inteiro ≥ 0, default `0`                    |
-| `categoryId`, `supplierId` | opcional (devem pertencer à empresa)               |
-| `dimensions`   | opcional, objeto de números                                |
-| `status`       | opcional (`active`/`inactive`), default `active`          |
+| Campo                                       | Regras                                           |
+| ------------------------------------------- | ------------------------------------------------ |
+| `name`                                      | obrigatório, min 1                               |
+| `sku`, `barcode`, `description`, `imageUrl` | opcional, vazio → `null`                         |
+| `purchasePrice`, `salePrice`, `weight`      | opcional, ≥ 0                                    |
+| `quantity`, `minStock`                      | opcional, inteiro ≥ 0, default `0`               |
+| `categoryId`, `supplierId`                  | opcional (devem pertencer à empresa)             |
+| `dimensions`                                | opcional, objeto de números                      |
+| `status`                                    | opcional (`active`/`inactive`), default `active` |
 
 **Resposta 201:** produto criado (mesmo formato de um item de `GET /products`, sem `category`/`supplier` embutidos).
 
@@ -706,12 +706,12 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 **Erros:**
 
-| Status | Quando                                              |
-| ------ | --------------------------------------------------- |
-| 401    | Token ausente ou inválido                           |
-| 403    | Papel sem permissão `products:read`                 |
-| 404    | Sem `companyId` no token                            |
-| 400    | Produto inexistente/de outra empresa                |
+| Status | Quando                               |
+| ------ | ------------------------------------ |
+| 401    | Token ausente ou inválido            |
+| 403    | Papel sem permissão `products:read`  |
+| 404    | Sem `companyId` no token             |
+| 400    | Produto inexistente/de outra empresa |
 
 ---
 
@@ -735,12 +735,12 @@ Regras dos campos: iguais às validações do schema da empresa (CNPJ/máscara n
 
 **Erros:**
 
-| Status | Quando                                              |
-| ------ | --------------------------------------------------- |
-| 401    | Token ausente ou inválido                           |
-| 403    | Papel sem permissão `products:delete`               |
-| 404    | Sem `companyId` no token                            |
-| 400    | Produto inexistente/de outra empresa                |
+| Status | Quando                                |
+| ------ | ------------------------------------- |
+| 401    | Token ausente ou inválido             |
+| 403    | Papel sem permissão `products:delete` |
+| 404    | Sem `companyId` no token              |
+| 400    | Produto inexistente/de outra empresa  |
 
 ---
 

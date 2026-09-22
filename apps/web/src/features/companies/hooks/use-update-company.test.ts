@@ -47,7 +47,11 @@ describe('useUpdateCompany', () => {
     const { result } = renderHook(() => useUpdateCompany());
 
     await act(async () => {
-      await result.current.update('c-1', { phone: '(11) 99999-9999', city: 'São Paulo', state: 'SP' });
+      await result.current.update('c-1', {
+        phone: '(11) 99999-9999',
+        city: 'São Paulo',
+        state: 'SP',
+      });
     });
 
     expect(updateCompanyMock).toHaveBeenCalledWith('c-1', {
@@ -55,17 +59,16 @@ describe('useUpdateCompany', () => {
       city: 'São Paulo',
       state: 'SP',
     });
-    expect(setSessionMock).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'u-1' }),
-      company,
-    );
+    expect(setSessionMock).toHaveBeenCalledWith(expect.objectContaining({ id: 'u-1' }), company);
     expect(result.current.success).toBe(true);
     expect(result.current.error).toBeNull();
     expect(result.current.isLoading).toBe(false);
   });
 
   it('captura erro da API e não atualiza a sessão', async () => {
-    updateCompanyMock.mockRejectedValue(new ApiError('Apenas administradores podem alterar a empresa', 403));
+    updateCompanyMock.mockRejectedValue(
+      new ApiError('Apenas administradores podem alterar a empresa', 403),
+    );
     const { result } = renderHook(() => useUpdateCompany());
 
     await act(async () => {

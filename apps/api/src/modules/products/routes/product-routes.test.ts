@@ -77,7 +77,10 @@ describe('GET /products', () => {
     const other = await request(app)
       .post('/auth/register')
       .send({ ...registerPayload, email: 'outra-empresa@email.com', companyName: 'Outra LTDA' });
-    await Product.create({ companyId: other.body.user.companyId as string, name: 'Produto Alheio' });
+    await Product.create({
+      companyId: other.body.user.companyId as string,
+      name: 'Produto Alheio',
+    });
 
     const res = await request(app).get('/products').set('Authorization', `Bearer ${token}`);
 
@@ -200,20 +203,17 @@ describe('POST /products', () => {
   it('cria um produto na empresa como admin', async () => {
     const { token, companyId } = await registerAdmin();
 
-    const res = await request(app)
-      .post('/products')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        name: 'Notebook',
-        sku: 'NB-001',
-        barcode: '7891234567890',
-        description: 'Notebook 16GB',
-        purchasePrice: '2500.00',
-        salePrice: '3299.90',
-        quantity: 10,
-        minStock: 2,
-        status: 'active',
-      });
+    const res = await request(app).post('/products').set('Authorization', `Bearer ${token}`).send({
+      name: 'Notebook',
+      sku: 'NB-001',
+      barcode: '7891234567890',
+      description: 'Notebook 16GB',
+      purchasePrice: '2500.00',
+      salePrice: '3299.90',
+      quantity: 10,
+      minStock: 2,
+      status: 'active',
+    });
 
     expect(res.status).toBe(201);
     expect(res.body.name).toBe('Notebook');
@@ -372,9 +372,7 @@ describe('FK set null ao remover categoria/fornecedor', () => {
     const category = await Category.create({ companyId, name: 'Informática' });
     const product = await Product.create({ companyId, name: 'Notebook', categoryId: category.id });
 
-    await request(app)
-      .delete(`/categories/${category.id}`)
-      .set('Authorization', `Bearer ${token}`);
+    await request(app).delete(`/categories/${category.id}`).set('Authorization', `Bearer ${token}`);
 
     const stored = await Product.findByPk(product.id);
     expect(stored!.categoryId).toBeNull();

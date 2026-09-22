@@ -73,7 +73,10 @@ describe('GET /categories', () => {
     const other = await request(app)
       .post('/auth/register')
       .send({ ...registerPayload, email: 'outra-empresa@email.com', companyName: 'Outra LTDA' });
-    await Category.create({ companyId: other.body.user.companyId as string, name: 'Outra Categoria' });
+    await Category.create({
+      companyId: other.body.user.companyId as string,
+      name: 'Outra Categoria',
+    });
 
     const res = await request(app).get('/categories').set('Authorization', `Bearer ${token}`);
 

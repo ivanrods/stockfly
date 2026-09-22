@@ -11,7 +11,13 @@ vi.mock('./use-auth', () => ({
   useAuth: () => useAuthMock(),
 }));
 
-function renderPublic({ isAuthenticated, isLoading }: { isAuthenticated: boolean; isLoading: boolean }) {
+function renderPublic({
+  isAuthenticated,
+  isLoading,
+}: {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}) {
   useAuthMock.mockReturnValue({ isAuthenticated, isLoading });
   return render(
     <MemoryRouter initialEntries={['/login']}>

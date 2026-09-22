@@ -126,7 +126,12 @@ describe('useRegister', () => {
 
     await act(async () => {
       await result.current
-        .register({ name: 'João', email: 'joao@email.com', password: '12345678', companyName: 'Empresa LTDA' })
+        .register({
+          name: 'João',
+          email: 'joao@email.com',
+          password: '12345678',
+          companyName: 'Empresa LTDA',
+        })
         .catch(() => undefined);
     });
 
@@ -140,7 +145,12 @@ describe('useRegister', () => {
 
     await act(async () => {
       await result.current
-        .register({ name: 'João', email: 'joao@email.com', password: '12345678', companyName: 'Empresa LTDA' })
+        .register({
+          name: 'João',
+          email: 'joao@email.com',
+          password: '12345678',
+          companyName: 'Empresa LTDA',
+        })
         .catch(() => undefined);
     });
     expect(result.current.error).toBe('E-mail já está em uso');

@@ -6,11 +6,7 @@ import { logout as requestLogout } from '@/features/auth/services/logout-service
 import { getCurrentUser } from '@/features/auth/services/current-user-service';
 import { getMyCompany } from '@/features/companies/services/company-service';
 import { decodeJwtPayload } from './jwt';
-import {
-  clearTokens,
-  getAccessToken,
-  getRefreshToken,
-} from './token-storage';
+import { clearTokens, getAccessToken, getRefreshToken } from './token-storage';
 import { AuthContext } from './auth-context';
 import type { AuthContextValue } from './auth-context';
 

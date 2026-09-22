@@ -90,18 +90,15 @@ describe('POST /suppliers', () => {
   it('cria um fornecedor na empresa como admin', async () => {
     const { token, companyId } = await registerAdmin();
 
-    const res = await request(app)
-      .post('/suppliers')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        name: 'Tech Distribuidora',
-        contactName: 'Carlos',
-        phone: '(11) 99999-0000',
-        email: 'contato@tech.com',
-        cnpj: '12.345.678/0001-90',
-        city: 'São Paulo',
-        state: 'sp',
-      });
+    const res = await request(app).post('/suppliers').set('Authorization', `Bearer ${token}`).send({
+      name: 'Tech Distribuidora',
+      contactName: 'Carlos',
+      phone: '(11) 99999-0000',
+      email: 'contato@tech.com',
+      cnpj: '12.345.678/0001-90',
+      city: 'São Paulo',
+      state: 'sp',
+    });
 
     expect(res.status).toBe(201);
     expect(res.body.name).toBe('Tech Distribuidora');

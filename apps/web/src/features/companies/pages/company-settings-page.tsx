@@ -61,16 +61,77 @@ export default function CompanySettingsPage() {
         onChange={(e) => setName(e.target.value)}
         fullWidth
       />
-      <TextField label="CNPJ" id="cnpj" value={cnpj} onChange={(e) => setCnpj(e.target.value)} fullWidth />
-      <TextField label="Telefone" id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} fullWidth />
-      <TextField label="E-mail" id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} fullWidth />
-      <TextField label="Logradouro" id="street" value={street} onChange={(e) => setStreet(e.target.value)} fullWidth />
-      <TextField label="Número" id="number" value={number} onChange={(e) => setNumber(e.target.value)} fullWidth />
-      <TextField label="Complemento" id="complement" value={complement} onChange={(e) => setComplement(e.target.value)} fullWidth />
-      <TextField label="Bairro" id="neighborhood" value={neighborhood} onChange={(e) => setNeighborhood(e.target.value)} fullWidth />
-      <TextField label="Cidade" id="city" value={city} onChange={(e) => setCity(e.target.value)} fullWidth />
-      <TextField label="UF" id="state" value={state} onChange={(e) => setState(e.target.value)} fullWidth />
-      <TextField label="CEP" id="zipCode" value={zipCode} onChange={(e) => setZipCode(e.target.value)} fullWidth />
+      <TextField
+        label="CNPJ"
+        id="cnpj"
+        value={cnpj}
+        onChange={(e) => setCnpj(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        label="Telefone"
+        id="phone"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        label="E-mail"
+        id="email"
+        type="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        label="Logradouro"
+        id="street"
+        value={street}
+        onChange={(e) => setStreet(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        label="Número"
+        id="number"
+        value={number}
+        onChange={(e) => setNumber(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        label="Complemento"
+        id="complement"
+        value={complement}
+        onChange={(e) => setComplement(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        label="Bairro"
+        id="neighborhood"
+        value={neighborhood}
+        onChange={(e) => setNeighborhood(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        label="Cidade"
+        id="city"
+        value={city}
+        onChange={(e) => setCity(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        label="UF"
+        id="state"
+        value={state}
+        onChange={(e) => setState(e.target.value)}
+        fullWidth
+      />
+      <TextField
+        label="CEP"
+        id="zipCode"
+        value={zipCode}
+        onChange={(e) => setZipCode(e.target.value)}
+        fullWidth
+      />
 
       <Button type="submit" variant="contained" disabled={isLoading}>
         {isLoading ? 'Salvando...' : 'Salvar'}

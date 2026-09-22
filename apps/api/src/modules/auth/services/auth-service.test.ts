@@ -19,12 +19,13 @@ const {
 } = vi.hoisted(() => ({
   findByEmailMock: vi.fn<(email: string) => Promise<User | null>>(),
   findByIdMock: vi.fn<(id: string) => Promise<User | null>>(),
-  createMock: vi.fn<
-    (
-      data: { email: string; password: string; name: string; companyId: string; role: UserRole },
-      transaction?: unknown,
-    ) => Promise<User>
-  >(),
+  createMock:
+    vi.fn<
+      (
+        data: { email: string; password: string; name: string; companyId: string; role: UserRole },
+        transaction?: unknown,
+      ) => Promise<User>
+    >(),
   hashMock: vi.fn(async (_password: string, _saltRounds: number) => 'senha-hasheada'),
   compareMock: vi.fn(async (_password: string, _hash: string) => true),
   signMock: vi.fn(() => 'token-falso'),

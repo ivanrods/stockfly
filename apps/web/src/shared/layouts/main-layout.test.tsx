@@ -86,7 +86,10 @@ describe('MainLayout', () => {
   it('possui link para as configurações da empresa', () => {
     renderLayout();
 
-    expect(screen.getByRole('link', { name: /Configurações/i })).toHaveAttribute('href', '/settings');
+    expect(screen.getByRole('link', { name: /Configurações/i })).toHaveAttribute(
+      'href',
+      '/settings',
+    );
   });
 
   it('faz logout ao clicar em Sair', async () => {

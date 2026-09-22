@@ -215,15 +215,15 @@ Tabela de junção `Role` × `Permission` (matriz de permissões de cada papel).
 
 Catálogo de categorias de produtos, escopado por empresa. Soft delete (`paranoid: true`).
 
-| Coluna        | Tipo   | Restrições                                   |
-| ------------- | ------ | -------------------------------------------- |
-| `id`          | UUID   | PK, default UUIDV4                           |
-| `companyId`   | UUID   | NOT NULL, FK → `Company.id` (`company_id`)   |
-| `name`        | STRING | NOT NULL                                     |
-| `description` | STRING | NULL                                         |
-| `deletedAt`   | DATE   | NULL (`deleted_at`, soft delete)             |
-| `createdAt`   | DATE   | NOT NULL                                     |
-| `updatedAt`   | DATE   | NOT NULL                                     |
+| Coluna        | Tipo   | Restrições                                 |
+| ------------- | ------ | ------------------------------------------ |
+| `id`          | UUID   | PK, default UUIDV4                         |
+| `companyId`   | UUID   | NOT NULL, FK → `Company.id` (`company_id`) |
+| `name`        | STRING | NOT NULL                                   |
+| `description` | STRING | NULL                                       |
+| `deletedAt`   | DATE   | NULL (`deleted_at`, soft delete)           |
+| `createdAt`   | DATE   | NOT NULL                                   |
+| `updatedAt`   | DATE   | NOT NULL                                   |
 
 **Relações:** `Category.belongsTo(Company)` (alias `company`); `Company.hasMany(Category)` (alias `categories`); `Category.hasMany(Product)` (alias `products`).
 
@@ -246,25 +246,25 @@ class Category extends Model {
 
 Catálogo de fornecedores, escopado por empresa. Soft delete (`paranoid: true`).
 
-| Coluna        | Tipo      | Restrições                                   |
-| ------------- | --------- | -------------------------------------------- |
-| `id`          | UUID      | PK, default UUIDV4                           |
-| `companyId`   | UUID      | NOT NULL, FK → `Company.id` (`company_id`)   |
-| `name`        | STRING    | NOT NULL                                     |
-| `contactName` | STRING    | NULL (`contact_name`)                        |
-| `phone`       | STRING    | NULL                                         |
-| `email`       | STRING    | NULL                                         |
-| `cnpj`        | STRING    | NULL (14 dígitos normalizado)                |
-| `street`      | STRING    | NULL                                         |
-| `number`      | STRING    | NULL                                         |
-| `complement`  | STRING    | NULL                                         |
-| `neighborhood`| STRING    | NULL                                         |
-| `city`        | STRING    | NULL                                         |
-| `state`       | STRING(2) | NULL (UF)                                    |
-| `zipCode`     | STRING    | NULL (`zip_code`)                            |
-| `deletedAt`   | DATE      | NULL (`deleted_at`, soft delete)             |
-| `createdAt`   | DATE      | NOT NULL                                     |
-| `updatedAt`   | DATE      | NOT NULL                                     |
+| Coluna         | Tipo      | Restrições                                 |
+| -------------- | --------- | ------------------------------------------ |
+| `id`           | UUID      | PK, default UUIDV4                         |
+| `companyId`    | UUID      | NOT NULL, FK → `Company.id` (`company_id`) |
+| `name`         | STRING    | NOT NULL                                   |
+| `contactName`  | STRING    | NULL (`contact_name`)                      |
+| `phone`        | STRING    | NULL                                       |
+| `email`        | STRING    | NULL                                       |
+| `cnpj`         | STRING    | NULL (14 dígitos normalizado)              |
+| `street`       | STRING    | NULL                                       |
+| `number`       | STRING    | NULL                                       |
+| `complement`   | STRING    | NULL                                       |
+| `neighborhood` | STRING    | NULL                                       |
+| `city`         | STRING    | NULL                                       |
+| `state`        | STRING(2) | NULL (UF)                                  |
+| `zipCode`      | STRING    | NULL (`zip_code`)                          |
+| `deletedAt`    | DATE      | NULL (`deleted_at`, soft delete)           |
+| `createdAt`    | DATE      | NOT NULL                                   |
+| `updatedAt`    | DATE      | NOT NULL                                   |
 
 **Relações:** `Supplier.belongsTo(Company)` (alias `company`); `Company.hasMany(Supplier)` (alias `suppliers`); `Supplier.hasMany(Product)` (alias `products`).
 
@@ -297,27 +297,27 @@ class Supplier extends Model {
 
 Produtos do estoque, escopados por empresa. Soft delete (`paranoid: true`).
 
-| Coluna          | Tipo              | Restrições                                      |
-| --------------- | ----------------- | ----------------------------------------------- |
-| `id`            | UUID              | PK, default UUIDV4                              |
-| `companyId`     | UUID              | NOT NULL, FK → `Company.id` (`company_id`)      |
-| `name`          | STRING            | NOT NULL                                        |
-| `sku`           | STRING            | NULL                                            |
-| `barcode`       | STRING            | NULL                                            |
-| `description`   | TEXT              | NULL                                            |
-| `purchasePrice` | DECIMAL(10,2)     | NULL (`purchase_price`)                         |
-| `salePrice`     | DECIMAL(10,2)     | NULL (`sale_price`)                             |
-| `quantity`      | INTEGER           | NOT NULL, default `0` (estoque atual)           |
-| `minStock`      | INTEGER           | NOT NULL, default `0` (`min_stock`)             |
-| `categoryId`    | UUID              | NULL, FK → `Category.id` (`category_id`, SET NULL) |
-| `supplierId`    | UUID              | NULL, FK → `Supplier.id` (`supplier_id`, SET NULL) |
-| `imageUrl`      | STRING            | NULL (`image_url`)                              |
-| `weight`        | DECIMAL(10,3)     | NULL                                            |
-| `dimensions`    | JSON              | NULL (`{ length, width, height }`)              |
-| `status`        | ENUM              | `active`/`inactive`, NOT NULL, default `active` |
-| `deletedAt`     | DATE              | NULL (`deleted_at`, soft delete)                |
-| `createdAt`     | DATE              | NOT NULL                                        |
-| `updatedAt`     | DATE              | NOT NULL                                        |
+| Coluna          | Tipo          | Restrições                                         |
+| --------------- | ------------- | -------------------------------------------------- |
+| `id`            | UUID          | PK, default UUIDV4                                 |
+| `companyId`     | UUID          | NOT NULL, FK → `Company.id` (`company_id`)         |
+| `name`          | STRING        | NOT NULL                                           |
+| `sku`           | STRING        | NULL                                               |
+| `barcode`       | STRING        | NULL                                               |
+| `description`   | TEXT          | NULL                                               |
+| `purchasePrice` | DECIMAL(10,2) | NULL (`purchase_price`)                            |
+| `salePrice`     | DECIMAL(10,2) | NULL (`sale_price`)                                |
+| `quantity`      | INTEGER       | NOT NULL, default `0` (estoque atual)              |
+| `minStock`      | INTEGER       | NOT NULL, default `0` (`min_stock`)                |
+| `categoryId`    | UUID          | NULL, FK → `Category.id` (`category_id`, SET NULL) |
+| `supplierId`    | UUID          | NULL, FK → `Supplier.id` (`supplier_id`, SET NULL) |
+| `imageUrl`      | STRING        | NULL (`image_url`)                                 |
+| `weight`        | DECIMAL(10,3) | NULL                                               |
+| `dimensions`    | JSON          | NULL (`{ length, width, height }`)                 |
+| `status`        | ENUM          | `active`/`inactive`, NOT NULL, default `active`    |
+| `deletedAt`     | DATE          | NULL (`deleted_at`, soft delete)                   |
+| `createdAt`     | DATE          | NOT NULL                                           |
+| `updatedAt`     | DATE          | NOT NULL                                           |
 
 **Relações:** `Product.belongsTo(Company)` (alias `company`); `Product.belongsTo(Category)` (alias `category`); `Product.belongsTo(Supplier)` (alias `supplier`). FKs `category_id`/`supplier_id` são anuladas (SET NULL) também no soft delete via hook `beforeDestroy`.
 
@@ -369,23 +369,23 @@ Company ──┬── User ──── Role ──── Permission
 
 ### Tabelas alvo (resumo)
 
-| Tabela          | Campos principais                                                                                                              | Relações                                                         |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| `Company`       | ✅ nome, CNPJ, status, endereço                                                                                                | 1:N com Users, Products, Categories, Suppliers, Customers, Stock |
-| `User`          | ✅ name, email, password (+ `company_id`, `role`)                                                                              | N:1 Company, N:1 Role (através do `role` enum)                   |
-| `Role`          | ✅ nome, descrição, permissões (matriz em `RolePermission`)                                                                    | 1:N Users, N:N Permissions                                       |
-| `Permission`    | ✅ chave (ex: `stock.create`, `users:read`), descrição                                                                         | N:N Roles                                                        |
-| `RefreshToken`  | ✅ token, user, expiração                                                                                                      | N:1 User                                                         |
-| `Category`      | ✅ nome, descrição                                                                                                             | 1:N Products                                                     |
-| `Supplier`      | ✅ nome, telefone, email, endereço, CNPJ, contato                                                                               | 1:N Products                                                     |
-| `Product`       | ✅ nome, SKU, código de barras, descrição, preço compra, preço venda, quantidade, estoque mínimo, imagem, peso, dimensões, status | N:1 Category, N:1 Supplier, 1:N StockMovement                  |
-| `StockMovement` | tipo (entrada/saída), quantidade, motivo, valor unitário, nota, data, responsável                                              | N:1 Product, N:1 User (responsável)                              |
-| `Customer`      | nome, telefone, email, endereço, CPF/CNPJ                                                                                      | 1:N Sale                                                         |
-| `Sale`          | total, data, cliente                                                                                                           | N:1 Customer, 1:N SaleItem                                       |
-| `SaleItem`      | produto, quantidade, preço                                                                                                     | N:1 Sale, N:1 Product                                            |
-| `Purchase`      | fornecedor, valor, número da nota, data                                                                                        | N:1 Supplier, 1:N PurchaseItem                                   |
-| `PurchaseItem`  | produto, quantidade, valor unitário                                                                                            | N:1 Purchase, N:1 Product                                        |
-| `AuditLog`      | user, action, entity, entity_id, dados                                                                                         | N:1 User                                                         |
+| Tabela          | Campos principais                                                                                                                 | Relações                                                         |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `Company`       | ✅ nome, CNPJ, status, endereço                                                                                                   | 1:N com Users, Products, Categories, Suppliers, Customers, Stock |
+| `User`          | ✅ name, email, password (+ `company_id`, `role`)                                                                                 | N:1 Company, N:1 Role (através do `role` enum)                   |
+| `Role`          | ✅ nome, descrição, permissões (matriz em `RolePermission`)                                                                       | 1:N Users, N:N Permissions                                       |
+| `Permission`    | ✅ chave (ex: `stock.create`, `users:read`), descrição                                                                            | N:N Roles                                                        |
+| `RefreshToken`  | ✅ token, user, expiração                                                                                                         | N:1 User                                                         |
+| `Category`      | ✅ nome, descrição                                                                                                                | 1:N Products                                                     |
+| `Supplier`      | ✅ nome, telefone, email, endereço, CNPJ, contato                                                                                 | 1:N Products                                                     |
+| `Product`       | ✅ nome, SKU, código de barras, descrição, preço compra, preço venda, quantidade, estoque mínimo, imagem, peso, dimensões, status | N:1 Category, N:1 Supplier, 1:N StockMovement                    |
+| `StockMovement` | tipo (entrada/saída), quantidade, motivo, valor unitário, nota, data, responsável                                                 | N:1 Product, N:1 User (responsável)                              |
+| `Customer`      | nome, telefone, email, endereço, CPF/CNPJ                                                                                         | 1:N Sale                                                         |
+| `Sale`          | total, data, cliente                                                                                                              | N:1 Customer, 1:N SaleItem                                       |
+| `SaleItem`      | produto, quantidade, preço                                                                                                        | N:1 Sale, N:1 Product                                            |
+| `Purchase`      | fornecedor, valor, número da nota, data                                                                                           | N:1 Supplier, 1:N PurchaseItem                                   |
+| `PurchaseItem`  | produto, quantidade, valor unitário                                                                                               | N:1 Purchase, N:1 Product                                        |
+| `AuditLog`      | user, action, entity, entity_id, dados                                                                                            | N:1 User                                                         |
 
 > ✅ = já implementado.
 

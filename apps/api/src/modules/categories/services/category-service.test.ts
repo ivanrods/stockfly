@@ -59,7 +59,9 @@ describe('CategoryService', () => {
 
   it('update lança erro quando não existe', async () => {
     updateMock.mockResolvedValue(null);
-    await expect(categoryService.update('c-1', 'x', {})).rejects.toThrow('Categoria não encontrada');
+    await expect(categoryService.update('c-1', 'x', {})).rejects.toThrow(
+      'Categoria não encontrada',
+    );
   });
 
   it('remove delega ao repository', async () => {

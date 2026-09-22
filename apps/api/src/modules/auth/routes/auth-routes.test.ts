@@ -8,7 +8,12 @@ import { RefreshToken } from '../../../shared/database/models/refresh-token-mode
 import { Company } from '../../../shared/database/models/company-model.js';
 
 describe('POST /auth/register', () => {
-  const payload = { name: 'João', email: 'joao@email.com', password: '12345678', companyName: 'Empresa LTDA' };
+  const payload = {
+    name: 'João',
+    email: 'joao@email.com',
+    password: '12345678',
+    companyName: 'Empresa LTDA',
+  };
 
   it('cria usuário e retorna user + company + accessToken + refreshToken', async () => {
     const res = await request(app).post('/auth/register').send(payload);
@@ -63,7 +68,12 @@ describe('POST /auth/register', () => {
 });
 
 describe('POST /auth/login', () => {
-  const payload = { name: 'João', email: 'joao@email.com', password: '12345678', companyName: 'Empresa LTDA' };
+  const payload = {
+    name: 'João',
+    email: 'joao@email.com',
+    password: '12345678',
+    companyName: 'Empresa LTDA',
+  };
 
   async function createUser() {
     await request(app).post('/auth/register').send(payload);
@@ -119,7 +129,12 @@ describe('POST /auth/login', () => {
 });
 
 describe('POST /auth/refresh', () => {
-  const payload = { name: 'João', email: 'joao@email.com', password: '12345678', companyName: 'Empresa LTDA' };
+  const payload = {
+    name: 'João',
+    email: 'joao@email.com',
+    password: '12345678',
+    companyName: 'Empresa LTDA',
+  };
 
   async function createUserWithRefreshToken() {
     const res = await request(app).post('/auth/register').send(payload);
@@ -192,7 +207,12 @@ describe('POST /auth/refresh', () => {
 });
 
 describe('POST /auth/logout', () => {
-  const payload = { name: 'João', email: 'joao@email.com', password: '12345678', companyName: 'Empresa LTDA' };
+  const payload = {
+    name: 'João',
+    email: 'joao@email.com',
+    password: '12345678',
+    companyName: 'Empresa LTDA',
+  };
 
   it('revoga o refresh token', async () => {
     const res = await request(app).post('/auth/register').send(payload);

@@ -1,9 +1,6 @@
 import { Request, Response } from 'express';
 import categoryService from '../services/category-service.js';
-import {
-  createCategorySchema,
-  updateCategorySchema,
-} from '../validation/category-validation.js';
+import { createCategorySchema, updateCategorySchema } from '../validation/category-validation.js';
 import { CreateCategoryDTO, UpdateCategoryDTO } from '../dto/category-dto.js';
 
 class CategoryController {

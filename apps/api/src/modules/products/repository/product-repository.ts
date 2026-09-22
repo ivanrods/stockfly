@@ -3,11 +3,7 @@ import { sequelize } from '../../../shared/config/database.js';
 import { Product } from '../../../shared/database/models/product-model.js';
 import { Category } from '../../../shared/database/models/category-model.js';
 import { Supplier } from '../../../shared/database/models/supplier-model.js';
-import {
-  CreateProductDTO,
-  UpdateProductDTO,
-  ProductQueryDTO,
-} from '../dto/product-dto.js';
+import { CreateProductDTO, UpdateProductDTO, ProductQueryDTO } from '../dto/product-dto.js';
 
 type ProductListFilters = ProductQueryDTO & { companyId: string };
 

@@ -59,7 +59,9 @@ describe('SupplierService', () => {
 
   it('update lança erro quando não existe', async () => {
     updateMock.mockResolvedValue(null);
-    await expect(supplierService.update('c-1', 'x', {})).rejects.toThrow('Fornecedor não encontrado');
+    await expect(supplierService.update('c-1', 'x', {})).rejects.toThrow(
+      'Fornecedor não encontrado',
+    );
   });
 
   it('remove delega ao repository', async () => {

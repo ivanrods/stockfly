@@ -52,7 +52,11 @@ describe('company-service', () => {
     };
     putMock.mockResolvedValue({ data: updatedCompany });
 
-    const result = await updateCompany('c-1', { phone: '(11) 99999-9999', city: 'São Paulo', state: 'SP' });
+    const result = await updateCompany('c-1', {
+      phone: '(11) 99999-9999',
+      city: 'São Paulo',
+      state: 'SP',
+    });
 
     expect(putMock).toHaveBeenCalledWith('/companies/c-1', {
       phone: '(11) 99999-9999',

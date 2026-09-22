@@ -42,7 +42,12 @@ const baseQuery: ProductQueryDTO & { companyId: string } = {
   lowStock: undefined,
 };
 
-const createData = { name: 'Notebook', quantity: 0, minStock: 0, status: 'active' } as CreateProductDTO;
+const createData = {
+  name: 'Notebook',
+  quantity: 0,
+  minStock: 0,
+  status: 'active',
+} as CreateProductDTO;
 
 describe('ProductRepository.findAll', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -142,7 +147,10 @@ describe('ProductRepository.update/softDelete', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('update atualiza o produto quando encontrado', async () => {
-    const fake = { ...product, update: vi.fn().mockResolvedValue({ ...product, name: 'Ultrabook' }) };
+    const fake = {
+      ...product,
+      update: vi.fn().mockResolvedValue({ ...product, name: 'Ultrabook' }),
+    };
     findOneMock.mockResolvedValue(fake);
     const result = await productRepository.update('c-1', 'p-1', { name: 'Ultrabook' });
     expect(fake.update).toHaveBeenCalledWith({ name: 'Ultrabook' });

@@ -20,7 +20,19 @@ import companyService from './company-service.js';
 import type { CreateCompanyDTO } from '../dto/company-dto.js';
 
 const company = { id: 'c-1', name: 'Empresa', status: 'active' };
-const createData = { name: 'Empresa', cnpj: null, phone: null, email: null, street: null, number: null, complement: null, neighborhood: null, city: null, state: null, zipCode: null } as CreateCompanyDTO;
+const createData = {
+  name: 'Empresa',
+  cnpj: null,
+  phone: null,
+  email: null,
+  street: null,
+  number: null,
+  complement: null,
+  neighborhood: null,
+  city: null,
+  state: null,
+  zipCode: null,
+} as CreateCompanyDTO;
 
 describe('CompanyService', () => {
   beforeEach(() => vi.clearAllMocks());

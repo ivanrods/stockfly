@@ -13,7 +13,19 @@ import companyRepository from './company-repository.js';
 import type { CreateCompanyDTO } from '../dto/company-dto.js';
 
 const company = { id: 'c-1', name: 'Empresa', status: 'active' };
-const createData = { name: 'Empresa', cnpj: null, phone: null, email: null, street: null, number: null, complement: null, neighborhood: null, city: null, state: null, zipCode: null } as CreateCompanyDTO;
+const createData = {
+  name: 'Empresa',
+  cnpj: null,
+  phone: null,
+  email: null,
+  street: null,
+  number: null,
+  complement: null,
+  neighborhood: null,
+  city: null,
+  state: null,
+  zipCode: null,
+} as CreateCompanyDTO;
 
 describe('CompanyRepository', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -46,7 +58,10 @@ describe('CompanyRepository', () => {
   });
 
   it('inactivate define status inactive', async () => {
-    const fake = { ...company, update: vi.fn().mockResolvedValue({ ...company, status: 'inactive' }) };
+    const fake = {
+      ...company,
+      update: vi.fn().mockResolvedValue({ ...company, status: 'inactive' }),
+    };
     findByPkMock.mockResolvedValue(fake);
     const result = await companyRepository.inactivate('c-1');
     expect(fake.update).toHaveBeenCalledWith({ status: 'inactive' });

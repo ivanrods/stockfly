@@ -89,17 +89,11 @@ Product.belongsTo(Supplier, { foreignKey: 'supplier_id', as: 'supplier' });
 Supplier.hasMany(Product, { foreignKey: 'supplier_id', as: 'products' });
 
 Category.beforeDestroy(async (category) => {
-  await Product.update(
-    { categoryId: null },
-    { where: { categoryId: category.id } },
-  );
+  await Product.update({ categoryId: null }, { where: { categoryId: category.id } });
 });
 
 Supplier.beforeDestroy(async (supplier) => {
-  await Product.update(
-    { supplierId: null },
-    { where: { supplierId: supplier.id } },
-  );
+  await Product.update({ supplierId: null }, { where: { supplierId: supplier.id } });
 });
 
 export { BaseModel, Product };

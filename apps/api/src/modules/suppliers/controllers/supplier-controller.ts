@@ -1,9 +1,6 @@
 import { Request, Response } from 'express';
 import supplierService from '../services/supplier-service.js';
-import {
-  createSupplierSchema,
-  updateSupplierSchema,
-} from '../validation/supplier-validation.js';
+import { createSupplierSchema, updateSupplierSchema } from '../validation/supplier-validation.js';
 import { CreateSupplierDTO, UpdateSupplierDTO } from '../dto/supplier-dto.js';
 
 class SupplierController {
